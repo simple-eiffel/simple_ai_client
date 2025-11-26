@@ -17,7 +17,9 @@
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
 		<library name="framework" location="D:\prod\framework\framework.ecf"/>
 		<library name="simple_json" location="D:\prod\simple_json\simple_json.ecf"/>
+		<library name="simple_sql" location="D:\prod\simple_sql\simple_sql.ecf"/>
 		<library name="testing_ext" location="D:\prod\testing_ext\testing_ext.ecf"/>
+		<library name="time" location="$ISE_LIBRARY\library\time\time.ecf"/>
 		<cluster name="src" location=".\src\" recursive="true"/>
 	</target>
 	<target name="simple_ai_client_tests" extends="simple_ai_client">
