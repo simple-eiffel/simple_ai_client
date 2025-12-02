@@ -3,7 +3,7 @@ note
 		Client for Ollama embedding API.
 		
 		Generates vector embeddings from text using Ollama's local embedding models.
-		Uses curl via FW_PROCESS_HELPER to communicate with Ollama server.
+		Uses curl via SIMPLE_PROCESS_HELPER to communicate with Ollama server.
 		
 		Supported Models:
 		- nomic-embed-text (768 dimensions, recommended)
@@ -236,7 +236,7 @@ feature {NONE} -- Implementation
 
 feature {NONE} -- Implementation: Attributes
 
-	process_helper: FW_PROCESS_HELPER
+	process_helper: SIMPLE_PROCESS_HELPER
 			-- Process helper for executing curl
 
 	json: SIMPLE_JSON

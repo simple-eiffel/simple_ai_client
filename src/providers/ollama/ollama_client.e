@@ -1,5 +1,5 @@
 note
-	description: "Ollama AI client using curl via FW_PROCESS_HELPER"
+	description: "Ollama AI client using curl via SIMPLE_PROCESS_HELPER"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -150,7 +150,7 @@ feature {NONE} -- Implementation
 
 feature {NONE} -- Implementation: Attributes
 
-	process_helper: FW_PROCESS_HELPER
+	process_helper: SIMPLE_PROCESS_HELPER
 			-- Process helper for curl
 
 	json: SIMPLE_JSON
