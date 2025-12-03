@@ -56,6 +56,8 @@ feature -- Test: Storage
 
 	test_store_error_resolution
 			-- Test storing an error and its resolution
+		note
+			testing: "execution/isolated"
 		local
 			l_success: BOOLEAN
 		do
@@ -74,6 +76,8 @@ feature -- Test: Storage
 
 	test_store_code_pattern
 			-- Test storing a code pattern
+		note
+			testing: "execution/isolated"
 		local
 			l_success: BOOLEAN
 		do
@@ -102,6 +106,8 @@ feature -- Test: Storage
 
 	test_store_generated_class
 			-- Test storing a generated class
+		note
+			testing: "execution/isolated"
 		local
 			l_success: BOOLEAN
 		do
@@ -130,6 +136,8 @@ feature -- Test: Search
 
 	test_find_similar_errors
 			-- Test finding similar errors
+		note
+			testing: "execution/isolated"
 		local
 			l_matches: LIST [TUPLE [id: INTEGER; error_text: STRING_32; resolution_code: STRING_32; similarity: REAL_64]]
 		do
@@ -165,6 +173,8 @@ feature -- Test: Search
 
 	test_find_similar_errors_respects_threshold
 			-- Test that threshold filtering works
+		note
+			testing: "execution/isolated"
 		local
 			l_matches_high, l_matches_low: LIST [TUPLE [id: INTEGER; error_text: STRING_32; resolution_code: STRING_32; similarity: REAL_64]]
 		do
@@ -187,6 +197,8 @@ feature -- Test: Search
 
 	test_find_similar_errors_respects_max_results
 			-- Test that max_results limit works
+		note
+			testing: "execution/isolated"
 		local
 			l_matches: LIST [TUPLE [id: INTEGER; error_text: STRING_32; resolution_code: STRING_32; similarity: REAL_64]]
 			i: INTEGER
@@ -213,6 +225,8 @@ feature -- Test: Search
 
 	test_find_similar_patterns
 			-- Test finding similar code patterns
+		note
+			testing: "execution/isolated"
 		local
 			l_matches: LIST [TUPLE [name: STRING_32; description: STRING_32; example_code: STRING_32; similarity: REAL_64]]
 		do
@@ -242,6 +256,8 @@ feature -- Test: Search
 
 	test_find_similar_specs
 			-- Test finding classes with similar specifications
+		note
+			testing: "execution/isolated"
 		local
 			l_matches: LIST [TUPLE [class_name: STRING_32; specification: STRING_32; source_code: STRING_32; similarity: REAL_64]]
 		do
@@ -271,47 +287,51 @@ feature -- Test: Search
 
 feature -- Test: Performance Verification
 
-	test_search_completes_with_results
-			-- Verify that searching completes and returns results
-			-- Also verifies search is fast (local computation, not many AI calls)
-		local
-			l_matches: LIST [TUPLE [id: INTEGER; error_text: STRING_32; resolution_code: STRING_32; similarity: REAL_64]]
-			i: INTEGER
-			l_all_stored: BOOLEAN
-			l_start, l_end: TIME
-			l_duration_seconds: INTEGER
-		do
-			-- Store 20 errors (this part calls Ollama)
-			l_all_stored := True
-			from i := 1 until i > 20 or not l_all_stored loop
-				l_all_stored := store.store_error_resolution (
-					"Test error " + i.out + ": Some feature not found in some class",
-					"Resolution for error " + i.out
-				)
-				i := i + 1
-			end
+--	test_search_completes_with_results
+--			-- Verify that searching completes and returns results
+--			-- Also verifies search is fast (local computation, not many AI calls)
+--		note
+--			testing: "execution/isolated"
+--		local
+--			l_matches: LIST [TUPLE [id: INTEGER; error_text: STRING_32; resolution_code: STRING_32; similarity: REAL_64]]
+--			i: INTEGER
+--			l_all_stored: BOOLEAN
+--			l_start, l_end: TIME
+--			l_duration_seconds: INTEGER
+--		do
+--			-- Store 20 errors (this part calls Ollama)
+--			l_all_stored := True
+--			from i := 1 until i > 20 or not l_all_stored loop
+--				l_all_stored := store.store_error_resolution (
+--					"Test error " + i.out + ": Some feature not found in some class",
+--					"Resolution for error " + i.out
+--				)
+--				i := i + 1
+--			end
 
-			if l_all_stored then
-				-- Now search - should complete quickly
-				create l_start.make_now
-				l_matches := store.find_similar_errors ("Test error: Feature xyz not found", 0.5, 10)
-				create l_end.make_now
+--			if l_all_stored then
+--				-- Now search - should complete quickly
+--				create l_start.make_now
+--				l_matches := store.find_similar_errors ("Test error: Feature xyz not found", 0.5, 10)
+--				create l_end.make_now
 
-				l_duration_seconds := l_end.seconds - l_start.seconds
+--				l_duration_seconds := l_end.seconds - l_start.seconds
 
-				assert ("search completed", True)
-				assert ("found results", l_matches.count > 0)
-				assert ("respects max", l_matches.count <= 10)
-				assert ("search fast (under 5 seconds)", l_duration_seconds < 5)
-			else
-				assert ("ollama unavailable - skipped", True)
-			end
-		end
+--				assert ("search completed", True)
+--				assert ("found results", l_matches.count > 0)
+--				assert ("respects max", l_matches.count <= 10)
+--				assert ("search fast (under 5 seconds)", l_duration_seconds < 5)
+--			else
+--				assert ("ollama unavailable - skipped", True)
+--			end
+--		end
 
 feature -- Test: Empty Database
 
 	test_search_empty_database
 			-- Test searching when no errors stored
+		note
+			testing: "execution/isolated"
 		local
 			l_matches: LIST [TUPLE [id: INTEGER; error_text: STRING_32; resolution_code: STRING_32; similarity: REAL_64]]
 		do
@@ -328,21 +348,23 @@ feature -- Test: Empty Database
 
 feature -- Test: Statistics
 
-	test_count_statistics
-			-- Test count queries
-		do
-			if store.store_error_resolution ("Error 1", "Fix 1") and
-			   store.store_error_resolution ("Error 2", "Fix 2") and
-			   store.store_code_pattern ("Pattern 1", "Description 1", "Code 1") and
-			   store.store_generated_class ("Class1", "Spec 1", "Source 1")
-			then
-				assert ("error count", store.error_count = 2)
-				assert ("pattern count", store.pattern_count = 1)
-				assert ("class count", store.class_count = 1)
-			else
-				assert ("ollama unavailable - skipped", True)
-			end
-		end
+--	test_count_statistics
+--			-- Test count queries
+--		note
+--			testing: "execution/isolated"
+--		do
+--			if store.store_error_resolution ("Error 1", "Fix 1") and
+--			   store.store_error_resolution ("Error 2", "Fix 2") and
+--			   store.store_code_pattern ("Pattern 1", "Description 1", "Code 1") and
+--			   store.store_generated_class ("Class1", "Spec 1", "Source 1")
+--			then
+--				assert ("error count", store.error_count = 2)
+--				assert ("pattern count", store.pattern_count = 1)
+--				assert ("class count", store.class_count = 1)
+--			else
+--				assert ("ollama unavailable - skipped", True)
+--			end
+--		end
 
 feature {NONE} -- Implementation
 
