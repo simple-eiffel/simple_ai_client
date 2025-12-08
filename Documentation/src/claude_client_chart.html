@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="generator" content="ISE EiffelStudio version 25.02.9.8732 - win64">
+<meta name="description" content="Claude AI client using curl via SIMPLE_PROCESS_HELPER.  Implements the Anthropic Messages API for Claude models. API key is read from ANTHROPIC_API_KEY environment variable.  Supported Models: - claude-sonnet-4-5-20250929 (default, fast and capable) - claude-opus-4-5-20251101 (most capable) - claude-haiku-4-5-20251001 (fastest)  API Documentation: https://docs.anthropic.com/en/api/messages  Design by Contract: - API key must be set (via environment or explicit) - All operations require valid API key - Responses always attached (error or success)"/>
+<meta name="eis" content="name=Anthropic Messages API, src=https://docs.anthropic.com/en/api/messages, tag=api"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="copyright" content="Copyright (c) 2025, Larry Rix"/>
+<meta name="license" content="MIT License"/>
+<meta name="source" content="SIMPLE_AI_CLIENT - Unified AI Provider Library"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+<title>claude_client Chart</title>
+<link rel="stylesheet" href="../default.css" type="text/css">
+<script type="text/javascript" src="../goto.html"></script>
+</head>
+<body>
+<pre></pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<span class="nav class selected">Chart</span>
+<a class="nav class" href="claude_client_links.html">Relations</a>
+<a class="nav class" href="claude_client_short.html">Contracts</a>
+<span class="nav class goto">Go to: <input name="c" value="claude_client"></span>
+</div></form><pre><span class="ekeyword">class</span>
+	<a class="eclass" href="../src/claude_client_chart.html">CLAUDE_CLIENT</a>
+
+<span class="ekeyword">General</span>
+	<span class="eitag">cluster</span><span class="esymbol">:</span> <a class="ecluster" href="../src/index.html">src</a>
+	<span class="eitag">description</span><span class="esymbol">:</span> 
+		<span class="estring">&quot;Claude AI client using curl via SIMPLE_PROCESS_HELPER.</span>
+		
+		<span class="estring">Implements the Anthropic Messages API for Claude models.</span>
+		<span class="estring">API key is read from ANTHROPIC_API_KEY environment variable.</span>
+		
+		<span class="estring">Supported Models:</span>
+		<span class="estring">- claude-sonnet-4-5-20250929 (default, fast and capable)</span>
+		<span class="estring">- claude-opus-4-5-20251101 (most capable)</span>
+		<span class="estring">- claude-haiku-4-5-20251001 (fastest)</span>
+		
+		<span class="estring">API Documentation:</span>
+		<a class="estring" href="https://docs.anthropic.com/en/api/messages">https://docs.anthropic.com/en/api/messages</a>
+		
+		<span class="estring">Design by Contract:</span>
+		<span class="estring">- API key must be set (via environment or explicit)</span>
+		<span class="estring">- All operations require valid API key</span>
+		<span class="estring">- Responses always attached (error or success)&quot;</span>
+	<span class="eitag">create</span><span class="esymbol">:</span> <a class="efeature" href="../src/claude_client_short.html#f_make">make</a><span class="esymbol">,</span> <a class="efeature" href="../src/claude_client_short.html#f_make_with_api_key">make_with_api_key</a>
+
+<span class="ekeyword">Ancestors</span>
+	<a class="eclass" href="../src/ai_client_chart.html">AI_CLIENT</a><span class="echar">*</span>
+
+<span class="ekeyword">Queries</span>
+	<span title="`api_key' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_api_key">api_key</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`ask' was declared in AI_CLIENT"><a class="efeature" href="../src/ai_client_short.html#f_ask">ask</a> <span class="esymbol">(</span><span class="elocal">a_prompt</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../src/ai_response_chart.html">AI_RESPONSE</a></span>
+	<span title="`ask_with_system' was declared in AI_CLIENT"><a class="efeature" href="../src/ai_client_short.html#f_ask_with_system">ask_with_system</a> <span class="esymbol">(</span><span class="elocal">a_system</span><span class="esymbol">,</span> <span class="elocal">a_prompt</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../src/ai_response_chart.html">AI_RESPONSE</a></span>
+	<span title="`chat' was declared in AI_CLIENT"><a class="efeature" href="../src/ai_client_short.html#f_chat">chat</a> <span class="esymbol">(</span><span class="elocal">a_messages</span><span class="esymbol">:</span> <a class="eclass" href="../base/array_chart.html">ARRAY</a> <span class="esymbol">[</span><a class="eclass" href="../src/ai_message_chart.html">AI_MESSAGE</a><span class="esymbol">]</span><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../src/ai_response_chart.html">AI_RESPONSE</a></span>
+	<span title="`default_model' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_default_model">Default_model</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`estimated_cost' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_estimated_cost">estimated_cost</a><span class="esymbol">:</span> <a class="eclass" href="../base/real_64_chart.html">REAL_64</a></span>
+	<span title="`has_api_key' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_has_api_key">has_api_key</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`instruction_concise' was declared in AI_CLIENT"><a class="efeature" href="../src/ai_client_short.html#f_instruction_concise">Instruction_concise</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`instruction_normal' was declared in AI_CLIENT"><a class="efeature" href="../src/ai_client_short.html#f_instruction_normal">Instruction_normal</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`instruction_verbose' was declared in AI_CLIENT"><a class="efeature" href="../src/ai_client_short.html#f_instruction_verbose">Instruction_verbose</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`is_available' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_is_available">is_available</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`is_facility_logging_enabled' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_is_facility_logging_enabled">is_facility_logging_enabled</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`is_file_logging_enabled' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_is_file_logging_enabled">is_file_logging_enabled</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`is_logging_enabled' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_is_logging_enabled">is_logging_enabled</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`is_stderr_logging_enabled' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_is_stderr_logging_enabled">is_stderr_logging_enabled</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`model' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_model">model</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`model_haiku' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_model_haiku">Model_haiku</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`model_opus' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_model_opus">Model_opus</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`model_sonnet' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_model_sonnet">Model_sonnet</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`price_haiku_input' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_price_haiku_input">Price_haiku_input</a><span class="esymbol">:</span> <a class="eclass" href="../base/real_64_chart.html">REAL_64</a></span>
+	<span title="`price_haiku_output' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_price_haiku_output">Price_haiku_output</a><span class="esymbol">:</span> <a class="eclass" href="../base/real_64_chart.html">REAL_64</a></span>
+	<span title="`price_opus_input' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_price_opus_input">Price_opus_input</a><span class="esymbol">:</span> <a class="eclass" href="../base/real_64_chart.html">REAL_64</a></span>
+	<span title="`price_opus_output' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_price_opus_output">Price_opus_output</a><span class="esymbol">:</span> <a class="eclass" href="../base/real_64_chart.html">REAL_64</a></span>
+	<span title="`price_sonnet_input' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_price_sonnet_input">Price_sonnet_input</a><span class="esymbol">:</span> <a class="eclass" href="../base/real_64_chart.html">REAL_64</a></span>
+	<span title="`price_sonnet_output' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_price_sonnet_output">Price_sonnet_output</a><span class="esymbol">:</span> <a class="eclass" href="../base/real_64_chart.html">REAL_64</a></span>
+	<span title="`provider_name' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_provider_name">Provider_name</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`request_count' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_request_count">request_count</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+	<span title="`total_input_tokens' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_total_input_tokens">total_input_tokens</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_64_chart.html">INTEGER_64</a></span>
+	<span title="`total_output_tokens' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_total_output_tokens">total_output_tokens</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_64_chart.html">INTEGER_64</a></span>
+	<span title="`total_tokens' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_total_tokens">total_tokens</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_64_chart.html">INTEGER_64</a></span>
+	<span title="`usage_summary' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_usage_summary">usage_summary</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`verbosity_concise' was declared in AI_CLIENT"><a class="efeature" href="../src/ai_client_short.html#f_verbosity_concise">Verbosity_concise</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+	<span title="`verbosity_level' was declared in AI_CLIENT"><a class="efeature" href="../src/ai_client_short.html#f_verbosity_level">verbosity_level</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+	<span title="`verbosity_normal' was declared in AI_CLIENT"><a class="efeature" href="../src/ai_client_short.html#f_verbosity_normal">Verbosity_normal</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+	<span title="`verbosity_verbose' was declared in AI_CLIENT"><a class="efeature" href="../src/ai_client_short.html#f_verbosity_verbose">Verbosity_verbose</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+
+<span class="ekeyword">Commands</span>
+	<span title="`disable_all_logging' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_disable_all_logging">disable_all_logging</a></span>
+	<span title="`enable_file_logging' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_enable_file_logging">enable_file_logging</a> <span class="esymbol">(</span><span class="elocal">a_path</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a><span class="esymbol">)</span></span>
+	<span title="`enable_logging' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_enable_logging">enable_logging</a> <span class="esymbol">(</span><span class="elocal">a_logger</span><span class="esymbol">:</span> <a class="eclass" href="../logging/log_logging_facility_chart.html">LOG_LOGGING_FACILITY</a><span class="esymbol">)</span></span>
+	<span title="`enable_stderr_logging' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_enable_stderr_logging">enable_stderr_logging</a></span>
+	<span title="`reset_usage' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_reset_usage">reset_usage</a></span>
+	<span title="`set_api_key' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_set_api_key">set_api_key</a> <span class="esymbol">(</span><span class="elocal">a_key</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a><span class="esymbol">)</span></span>
+	<span title="`set_model' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_set_model">set_model</a> <span class="esymbol">(</span><span class="elocal">a_model</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a><span class="esymbol">)</span></span>
+	<span title="`set_verbosity' was declared in AI_CLIENT"><a class="efeature" href="../src/ai_client_short.html#f_set_verbosity">set_verbosity</a> <span class="esymbol">(</span><span class="elocal">a_level</span><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a><span class="esymbol">)</span></span>
+	<span title="`use_concise_responses' was declared in AI_CLIENT"><a class="efeature" href="../src/ai_client_short.html#f_use_concise_responses">use_concise_responses</a></span>
+	<span title="`use_haiku' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_use_haiku">use_haiku</a></span>
+	<span title="`use_normal_responses' was declared in AI_CLIENT"><a class="efeature" href="../src/ai_client_short.html#f_use_normal_responses">use_normal_responses</a></span>
+	<span title="`use_opus' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_use_opus">use_opus</a></span>
+	<span title="`use_sonnet' is declared in `Current'"><a class="efeature" href="../src/claude_client_short.html#f_use_sonnet">use_sonnet</a></span>
+	<span title="`use_verbose_responses' was declared in AI_CLIENT"><a class="efeature" href="../src/ai_client_short.html#f_use_verbose_responses">use_verbose_responses</a></span>
+
+<span class="ekeyword">Constraints</span>
+	<span class="etag">model attached</span>
+	<span class="etag">model not empty</span>
+	<span class="etag">api key attached</span>
+	<span class="etag">process helper attached</span>
+	<span class="etag">json attached</span>
+
+</pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<span class="nav class selected">Chart</span>
+<a class="nav class" href="claude_client_links.html">Relations</a>
+<a class="nav class" href="claude_client_short.html">Contracts</a>
+<span class="nav class goto">Go to: <input name="c" value="claude_client"></span>
+</div></form><pre></pre>
+<p style="text-align:center;">Generated by <a href="http://www.eiffel.com">ISE EiffelStudio</a></p>
+</body>
+</html>

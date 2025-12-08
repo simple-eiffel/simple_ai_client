@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="generator" content="ISE EiffelStudio version 25.02.9.8732 - win64">
+<meta name="description" content="Abstract AI client interface for multiple providers.  Provides unified interface for interacting with different AI providers (Ollama, Claude, Gemini, etc.) through a common API. All providers implement this deferred class to ensure consistent behavior.  Core Operations: - ask: Single prompt query - ask_with_system: Query with system instructions - chat: Multi-turn conversation with message history  Message Handling: All operations internally convert to the chat format (array of messages) which is the lowest-level operation. This ensures consistent behavior across all providers regardless of their native API structure.  Design by Contract: - All prompts and messages must be non-empty - Message arrays must contain at least one message - Responses are always attached (never Void) - Model names must be non-empty strings  Descendants must implement: - model: Current model name - provider_name: Provider identifier - set_model: Change active model - execute_chat: Provider-specific chat implementation"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="copyright" content="Copyright (c) 2025, Larry Rix"/>
+<meta name="license" content="MIT License"/>
+<meta name="source" content="SIMPLE_AI_CLIENT - Unified AI Provider Library"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+<title>ai_client Chart</title>
+<link rel="stylesheet" href="../default.css" type="text/css">
+<script type="text/javascript" src="../goto.html"></script>
+</head>
+<body>
+<pre></pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<span class="nav class selected">Chart</span>
+<a class="nav class" href="ai_client_links.html">Relations</a>
+<a class="nav class" href="ai_client_short.html">Contracts</a>
+<span class="nav class goto">Go to: <input name="c" value="ai_client"></span>
+</div></form><pre><span class="ekeyword">deferred</span> <span class="ekeyword">class</span>
+	<a class="eclass" href="../src/ai_client_chart.html">AI_CLIENT</a>
+
+<span class="ekeyword">General</span>
+	<span class="eitag">cluster</span><span class="esymbol">:</span> <a class="ecluster" href="../src/index.html">src</a>
+	<span class="eitag">description</span><span class="esymbol">:</span> 
+		<span class="estring">&quot;Abstract AI client interface for multiple providers.</span>
+		
+		<span class="estring">Provides unified interface for interacting with different AI providers</span>
+		<span class="estring">(Ollama, Claude, Gemini, etc.) through a common API. All providers</span>
+		<span class="estring">implement this deferred class to ensure consistent behavior.</span>
+		
+		<span class="estring">Core Operations:</span>
+		<span class="estring">- ask: Single prompt query</span>
+		<span class="estring">- ask_with_system: Query with system instructions</span>
+		<span class="estring">- chat: Multi-turn conversation with message history</span>
+		
+		<span class="estring">Message Handling:</span>
+		<span class="estring">All operations internally convert to the chat format (array of messages)</span>
+		<span class="estring">which is the lowest-level operation. This ensures consistent behavior</span>
+		<span class="estring">across all providers regardless of their native API structure.</span>
+		
+		<span class="estring">Design by Contract:</span>
+		<span class="estring">- All prompts and messages must be non-empty</span>
+		<span class="estring">- Message arrays must contain at least one message</span>
+		<span class="estring">- Responses are always attached (never Void)</span>
+		<span class="estring">- Model names must be non-empty strings</span>
+		
+		<span class="estring">Descendants must implement:</span>
+		<span class="estring">- model: Current model name</span>
+		<span class="estring">- provider_name: Provider identifier</span>
+		<span class="estring">- set_model: Change active model</span>
+		<span class="estring">- execute_chat: Provider-specific chat implementation&quot;</span>
+
+<span class="ekeyword">Ancestors</span>
+	<a class="eclass" href="../base/any_chart.html">ANY</a>
+
+<span class="ekeyword">Queries</span>
+	<span title="`ask' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_ask">ask</a> <span class="esymbol">(</span><span class="elocal">a_prompt</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../src/ai_response_chart.html">AI_RESPONSE</a></span>
+	<span title="`ask_with_system' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_ask_with_system">ask_with_system</a> <span class="esymbol">(</span><span class="elocal">a_system</span><span class="esymbol">,</span> <span class="elocal">a_prompt</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../src/ai_response_chart.html">AI_RESPONSE</a></span>
+	<span title="`chat' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_chat">chat</a> <span class="esymbol">(</span><span class="elocal">a_messages</span><span class="esymbol">:</span> <a class="eclass" href="../base/array_chart.html">ARRAY</a> <span class="esymbol">[</span><a class="eclass" href="../src/ai_message_chart.html">AI_MESSAGE</a><span class="esymbol">]</span><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../src/ai_response_chart.html">AI_RESPONSE</a></span>
+	<span title="`instruction_concise' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_instruction_concise">Instruction_concise</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`instruction_normal' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_instruction_normal">Instruction_normal</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`instruction_verbose' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_instruction_verbose">Instruction_verbose</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`model' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_model">model</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`provider_name' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_provider_name">provider_name</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`verbosity_concise' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_verbosity_concise">Verbosity_concise</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+	<span title="`verbosity_level' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_verbosity_level">verbosity_level</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+	<span title="`verbosity_normal' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_verbosity_normal">Verbosity_normal</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+	<span title="`verbosity_verbose' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_verbosity_verbose">Verbosity_verbose</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+
+<span class="ekeyword">Commands</span>
+	<span title="`set_model' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_set_model">set_model</a> <span class="esymbol">(</span><span class="elocal">a_model</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a><span class="esymbol">)</span></span>
+	<span title="`set_verbosity' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_set_verbosity">set_verbosity</a> <span class="esymbol">(</span><span class="elocal">a_level</span><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a><span class="esymbol">)</span></span>
+	<span title="`use_concise_responses' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_use_concise_responses">use_concise_responses</a></span>
+	<span title="`use_normal_responses' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_use_normal_responses">use_normal_responses</a></span>
+	<span title="`use_verbose_responses' is declared in `Current'"><a class="efeature" href="../src/ai_client_short.html#f_use_verbose_responses">use_verbose_responses</a></span>
+
+</pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<span class="nav class selected">Chart</span>
+<a class="nav class" href="ai_client_links.html">Relations</a>
+<a class="nav class" href="ai_client_short.html">Contracts</a>
+<span class="nav class goto">Go to: <input name="c" value="ai_client"></span>
+</div></form><pre></pre>
+<p style="text-align:center;">Generated by <a href="http://www.eiffel.com">ISE EiffelStudio</a></p>
+</body>
+</html>

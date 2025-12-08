@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="generator" content="ISE EiffelStudio version 25.02.9.8732 - win64">
+<meta name="description" content="Message in AI conversation with role and content.  Represents a single message in a conversation with an AI provider. Each message has a role (system, user, or assistant) and text content.  Role Semantics: - system: Instructions/context for the AI (e.g., You are a helpful assistant) - user: Messages from the human user - assistant: Messages from the AI assistant (for multi-turn conversations)  Design by Contract: - Role must always be valid (system/user/assistant) - Content must never be empty - All creation routines enforce these constraints"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="copyright" content="Copyright (c) 2025, Larry Rix"/>
+<meta name="license" content="MIT License"/>
+<meta name="source" content="SIMPLE_AI_CLIENT - Unified AI Provider Library"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+<title>ai_message Chart</title>
+<link rel="stylesheet" href="../default.css" type="text/css">
+<script type="text/javascript" src="../goto.html"></script>
+</head>
+<body>
+<pre></pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<span class="nav class selected">Chart</span>
+<a class="nav class" href="ai_message_links.html">Relations</a>
+<a class="nav class" href="ai_message_short.html">Contracts</a>
+<span class="nav class goto">Go to: <input name="c" value="ai_message"></span>
+</div></form><pre><span class="ekeyword">class</span>
+	<a class="eclass" href="../src/ai_message_chart.html">AI_MESSAGE</a>
+
+<span class="ekeyword">General</span>
+	<span class="eitag">cluster</span><span class="esymbol">:</span> <a class="ecluster" href="../src/index.html">src</a>
+	<span class="eitag">description</span><span class="esymbol">:</span> 
+		<span class="estring">&quot;Message in AI conversation with role and content.</span>
+		
+		<span class="estring">Represents a single message in a conversation with an AI provider.</span>
+		<span class="estring">Each message has a role (system, user, or assistant) and text content.</span>
+		
+		<span class="estring">Role Semantics:</span>
+		<span class="estring">- system: Instructions/context for the AI (e.g., %&quot;You are a helpful assistant%&quot;)</span>
+		<span class="estring">- user: Messages from the human user</span>
+		<span class="estring">- assistant: Messages from the AI assistant (for multi-turn conversations)</span>
+		
+		<span class="estring">Design by Contract:</span>
+		<span class="estring">- Role must always be valid (system/user/assistant)</span>
+		<span class="estring">- Content must never be empty</span>
+		<span class="estring">- All creation routines enforce these constraints&quot;</span>
+	<span class="eitag">create</span><span class="esymbol">:</span> <a class="efeature" href="../src/ai_message_short.html#f_make">make</a><span class="esymbol">,</span> <a class="efeature" href="../src/ai_message_short.html#f_make_system">make_system</a><span class="esymbol">,</span> <a class="efeature" href="../src/ai_message_short.html#f_make_user">make_user</a><span class="esymbol">,</span> <a class="efeature" href="../src/ai_message_short.html#f_make_assistant">make_assistant</a>
+
+<span class="ekeyword">Ancestors</span>
+	<a class="eclass" href="../base/any_chart.html">ANY</a>
+
+<span class="ekeyword">Queries</span>
+	<span title="`content' is declared in `Current'"><a class="efeature" href="../src/ai_message_short.html#f_content">content</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`is_assistant' is declared in `Current'"><a class="efeature" href="../src/ai_message_short.html#f_is_assistant">is_assistant</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`is_system' is declared in `Current'"><a class="efeature" href="../src/ai_message_short.html#f_is_system">is_system</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`is_user' is declared in `Current'"><a class="efeature" href="../src/ai_message_short.html#f_is_user">is_user</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`max_reasonable_content_length' is declared in `Current'"><a class="efeature" href="../src/ai_message_short.html#f_max_reasonable_content_length">Max_reasonable_content_length</a><span class="esymbol">:</span> <a class="eclass" href="../base/integer_32_chart.html">INTEGER_32</a></span>
+	<span title="`role' is declared in `Current'"><a class="efeature" href="../src/ai_message_short.html#f_role">role</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`role_assistant' is declared in `Current'"><a class="efeature" href="../src/ai_message_short.html#f_role_assistant">Role_assistant</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`role_system' is declared in `Current'"><a class="efeature" href="../src/ai_message_short.html#f_role_system">Role_system</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`role_user' is declared in `Current'"><a class="efeature" href="../src/ai_message_short.html#f_role_user">Role_user</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+	<span title="`valid_role' is declared in `Current'"><a class="efeature" href="../src/ai_message_short.html#f_valid_role">valid_role</a> <span class="esymbol">(</span><span class="elocal">a_role</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+
+<span class="ekeyword">Constraints</span>
+	<span class="etag">role attached</span>
+	<span class="etag">content attached</span>
+	<span class="etag">role not empty</span>
+	<span class="etag">role is valid</span>
+	<span class="etag">content not empty</span>
+	<span class="etag">content reasonable</span>
+	<span class="etag">exactly one role</span>
+
+</pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<span class="nav class selected">Chart</span>
+<a class="nav class" href="ai_message_links.html">Relations</a>
+<a class="nav class" href="ai_message_short.html">Contracts</a>
+<span class="nav class goto">Go to: <input name="c" value="ai_message"></span>
+</div></form><pre></pre>
+<p style="text-align:center;">Generated by <a href="http://www.eiffel.com">ISE EiffelStudio</a></p>
+</body>
+</html>

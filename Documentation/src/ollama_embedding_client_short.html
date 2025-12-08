@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="generator" content="ISE EiffelStudio version 25.02.9.8732 - win64">
+<meta name="description" content="Client for Ollama embedding API.  Generates vector embeddings from text using Ollama's local embedding models. Uses curl via SIMPLE_PROCESS_HELPER to communicate with Ollama server.  Supported Models: - nomic-embed-text (768 dimensions, recommended) - mxbai-embed-large (1024 dimensions) - all-minilm (384 dimensions, fastest)  Usage Example: Tcreate client.make Tclient.set_model (nomic-embed-text) Tresponse := client.embed (This is the text to embed) Tif response.is_success and then attached response.embedding as emb then TT-- Use emb.cosine_similarity, emb.to_blob, etc. Tend  Batch Processing: Tresponses := client.embed_batch (<<text1, text2, text3>>)  Design by Contract: - Text to embed must not be empty - Model must be set before embedding - Base URL must point to running Ollama server"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="copyright" content="Copyright (c) 2025, Larry Rix"/>
+<meta name="license" content="MIT License"/>
+<meta name="source" content="SIMPLE_AI_CLIENT - Unified AI Provider Library"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+<title>ollama_embedding_client Contracts</title>
+<link rel="stylesheet" href="../default.css" type="text/css">
+<script type="text/javascript" src="../goto.html"></script>
+</head>
+<body>
+<pre></pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<a class="nav class" href="ollama_embedding_client_chart.html">Chart</a>
+<a class="nav class" href="ollama_embedding_client_links.html">Relations</a>
+<span class="nav class selected">Contracts</span>
+<span class="nav class goto">Go to: <input name="c" value="ollama_embedding_client"></span>
+</div></form><pre><span class="ekeyword">note</span>
+	<span class="eitag">description</span><span class="esymbol">:</span> <span class="estring">&quot;</span><span class="estring">[</span>
+		<span class="estring">Client for Ollama embedding API.</span>
+		
+		<span class="estring">Generates vector embeddings from text using Ollama's local embedding models.</span>
+		<span class="estring">Uses curl via SIMPLE_PROCESS_HELPER to communicate with Ollama server.</span>
+		
+		<span class="estring">Supported Models:</span>
+		<span class="estring">- nomic-embed-text (768 dimensions, recommended)</span>
+		<span class="estring">- mxbai-embed-large (1024 dimensions)</span>
+		<span class="estring">- all-minilm (384 dimensions, fastest)</span>
+		
+		<span class="estring">Usage Example:</span>
+		<span class="estring">	create client.make</span>
+		<span class="estring">	client.set_model (&quot;nomic-embed-text&quot;)</span>
+		<span class="estring">	response := client.embed (&quot;This is the text to embed&quot;)</span>
+		<span class="estring">	if response.is_success and then attached response.embedding as emb then</span>
+		<span class="estring">		-- Use emb.cosine_similarity, emb.to_blob, etc.</span>
+		<span class="estring">	end</span>
+		
+		<span class="estring">Batch Processing:</span>
+		<span class="estring">	responses := client.embed_batch (&lt;&lt;&quot;text1&quot;, &quot;text2&quot;, &quot;text3&quot;&gt;&gt;)</span>
+		
+		<span class="estring">Design by Contract:</span>
+		<span class="estring">- Text to embed must not be empty</span>
+		<span class="estring">- Model must be set before embedding</span>
+		<span class="estring">- Base URL must point to running Ollama server</span>
+	<span class="estring">]</span><span class="estring">&quot;</span>
+	<span class="eitag">date</span><span class="esymbol">:</span> <span class="estring">&quot;$Date$&quot;</span>
+	<span class="eitag">revision</span><span class="esymbol">:</span> <span class="estring">&quot;$Revision$&quot;</span>
+
+<span class="ekeyword">class</span> <span class="ekeyword">interface</span>
+	<a class="eclass" href="../src/ollama_embedding_client_short.html">OLLAMA_EMBEDDING_CLIENT</a>
+
+<span class="ekeyword">create</span> 
+	<a class="efeature" href="../src/ollama_embedding_client_short.html#f_make">make</a><span class="esymbol">,</span>
+	<a class="efeature" href="../src/ollama_embedding_client_short.html#f_make_with_base_url">make_with_base_url</a>
+
+<span class="ekeyword">feature</span> <span class="ecomment">--</span><span class="ecomment"> Access</span>
+
+	<a name="f_model"></a><a class="efeature" href="../src/ollama_embedding_client_short.html#f_model">model</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_short.html">STRING_32</a>
+			<span class="ecomment">--</span><span class="ecomment"> Current embedding model</span>
+
+	<a name="f_base_url"></a><a class="efeature" href="../src/ollama_embedding_client_short.html#f_base_url">base_url</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_short.html">STRING_32</a>
+			<span class="ecomment">--</span><span class="ecomment"> Ollama server base URL</span>
+
+	<a name="f_provider_name"></a><a class="efeature" href="../src/ollama_embedding_client_short.html#f_provider_name">Provider_name</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_short.html">STRING_8</a> <span class="esymbol">=</span> &quot;ollama&quot;
+			<span class="ecomment">--</span><span class="ecomment"> Provider identifier</span>
+	
+<span class="ekeyword">feature</span> <span class="ecomment">--</span><span class="ecomment"> Element change</span>
+
+	<a name="f_set_model"></a><a class="efeature" href="../src/ollama_embedding_client_short.html#f_set_model">set_model</a> <span class="esymbol">(</span><span class="elocal">a_model</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_short.html">STRING_32</a><span class="esymbol">)</span>
+			<span class="ecomment">--</span><span class="ecomment"> Set embedding model to </span><span class="equoted">a_model</span>
+		<span class="ekeyword">require</span>
+			<span class="etag">model_attached</span><span class="esymbol">:</span> <span class="elocal">a_model</span> <span class="esymbol">/=</span> <span class="ekeyword">Void</span>
+			<span class="etag">model_not_empty</span><span class="esymbol">:</span> <a class="ekeyword" href="../base/boolean_short.html#f_negated">not</a> <span class="elocal">a_model</span><span class="edot">.</span><a class="efeature" href="../base/finite_short.html#f_is_empty">is_empty</a>
+		<span class="ekeyword">ensure</span>
+			<span class="etag">model_set</span><span class="esymbol">:</span> <a class="efeature" href="../src/ollama_embedding_client_short.html#f_model">model</a> <span class="esymbol">=</span> <span class="elocal">a_model</span>
+	
+<span class="ekeyword">feature</span> <span class="ecomment">--</span><span class="ecomment"> Embedding operations</span>
+
+	<a name="f_embed"></a><a class="efeature" href="../src/ollama_embedding_client_short.html#f_embed">embed</a> <span class="esymbol">(</span><span class="elocal">a_text</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_short.html">STRING_32</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../src/ai_embedding_response_short.html">AI_EMBEDDING_RESPONSE</a>
+			<span class="ecomment">--</span><span class="ecomment"> Generate embedding for </span><span class="equoted">a_text</span>
+		<span class="ekeyword">require</span>
+			<span class="etag">text_attached</span><span class="esymbol">:</span> <span class="elocal">a_text</span> <span class="esymbol">/=</span> <span class="ekeyword">Void</span>
+			<span class="etag">text_not_empty</span><span class="esymbol">:</span> <a class="ekeyword" href="../base/boolean_short.html#f_negated">not</a> <span class="elocal">a_text</span><span class="edot">.</span><a class="efeature" href="../base/finite_short.html#f_is_empty">is_empty</a>
+		<span class="ekeyword">ensure</span>
+			<span class="etag">result_attached</span><span class="esymbol">:</span> <span class="ekeyword">Result</span> <span class="esymbol">/=</span> <span class="ekeyword">Void</span>
+			<span class="etag">provider_matches</span><span class="esymbol">:</span> <span class="ekeyword">Result</span><span class="edot">.</span><a class="efeature" href="../src/ai_embedding_response_short.html#f_provider">provider</a> <span class="esymbol">~</span> <a class="efeature" href="../src/ollama_embedding_client_short.html#f_provider_name">Provider_name</a>
+
+	<a name="f_embed_batch"></a><a class="efeature" href="../src/ollama_embedding_client_short.html#f_embed_batch">embed_batch</a> <span class="esymbol">(</span><span class="elocal">a_texts</span><span class="esymbol">:</span> <a class="eclass" href="../base/array_short.html">ARRAY</a> <span class="esymbol">[</span><a class="eclass" href="../base/string_32_short.html">STRING_32</a><span class="esymbol">]</span><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/array_short.html">ARRAY</a> <span class="esymbol">[</span><a class="eclass" href="../src/ai_embedding_response_short.html">AI_EMBEDDING_RESPONSE</a><span class="esymbol">]</span>
+			<span class="ecomment">--</span><span class="ecomment"> Generate embeddings for multiple texts</span>
+		<span class="ekeyword">require</span>
+			<span class="etag">texts_attached</span><span class="esymbol">:</span> <span class="elocal">a_texts</span> <span class="esymbol">/=</span> <span class="ekeyword">Void</span>
+			<span class="etag">texts_not_empty</span><span class="esymbol">:</span> <span class="elocal">a_texts</span><span class="edot">.</span><a class="efeature" href="../base/array_short.html#f_count">count</a> <a class="esymbol" href="../base/comparable_short.html#f_is_greater">&gt;</a> <span class="enumber">0</span>
+			<span class="etag">all_texts_valid</span><span class="esymbol">:</span> <span class="ekeyword">across</span>
+					<span class="elocal">a_texts</span> <span class="ekeyword">as</span> ic
+				<span class="ekeyword">all</span>
+					<span class="elocal">ic</span> <span class="esymbol">/=</span> <span class="ekeyword">Void</span> <a class="ekeyword" href="../base/boolean_short.html#f_conjuncted_semistrict">and then</a> <a class="ekeyword" href="../base/boolean_short.html#f_negated">not</a> <span class="elocal">ic</span><span class="edot">.</span><a class="efeature" href="../base/finite_short.html#f_is_empty">is_empty</a>
+				<span class="ekeyword">end</span>
+		<span class="ekeyword">ensure</span>
+			<span class="etag">result_attached</span><span class="esymbol">:</span> <span class="ekeyword">Result</span> <span class="esymbol">/=</span> <span class="ekeyword">Void</span>
+			<span class="etag">same_count</span><span class="esymbol">:</span> <span class="ekeyword">Result</span><span class="edot">.</span><a class="efeature" href="../base/array_short.html#f_count">count</a> <span class="esymbol">=</span> <span class="elocal">a_texts</span><span class="edot">.</span><a class="efeature" href="../base/array_short.html#f_count">count</a>
+	
+<span class="ekeyword">feature</span> <span class="ecomment">--</span><span class="ecomment"> Status</span>
+
+	<a name="f_is_available"></a><a class="efeature" href="../src/ollama_embedding_client_short.html#f_is_available">is_available</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_short.html">BOOLEAN</a>
+			<span class="ecomment">--</span><span class="ecomment"> Is the Ollama embedding service available?</span>
+	
+<span class="ekeyword">invariant</span>
+	<span class="etag">model_attached</span><span class="esymbol">:</span> <a class="efeature" href="../src/ollama_embedding_client_short.html#f_model">model</a> <span class="esymbol">/=</span> <span class="ekeyword">Void</span>
+	<span class="etag">model_not_empty</span><span class="esymbol">:</span> <a class="ekeyword" href="../base/boolean_short.html#f_negated">not</a> <a class="efeature" href="../src/ollama_embedding_client_short.html#f_model">model</a><span class="edot">.</span><a class="efeature" href="../base/finite_short.html#f_is_empty">is_empty</a>
+	<span class="etag">base_url_attached</span><span class="esymbol">:</span> <a class="efeature" href="../src/ollama_embedding_client_short.html#f_base_url">base_url</a> <span class="esymbol">/=</span> <span class="ekeyword">Void</span>
+	<span class="etag">base_url_not_empty</span><span class="esymbol">:</span> <a class="ekeyword" href="../base/boolean_short.html#f_negated">not</a> <a class="efeature" href="../src/ollama_embedding_client_short.html#f_base_url">base_url</a><span class="edot">.</span><a class="efeature" href="../base/finite_short.html#f_is_empty">is_empty</a>
+	<span class="etag">process_helper_attached</span><span class="esymbol">:</span> <a class="efeature" href="../src/ollama_embedding_client_short.html#f_process_helper">process_helper</a> <span class="esymbol">/=</span> <span class="ekeyword">Void</span>
+	<span class="etag">json_attached</span><span class="esymbol">:</span> <a class="efeature" href="../src/ollama_embedding_client_short.html#f_json">json</a> <span class="esymbol">/=</span> <span class="ekeyword">Void</span>
+
+<span class="ekeyword">note</span>
+	<span class="eitag">copyright</span><span class="esymbol">:</span> <span class="estring">&quot;Copyright (c) 2025, Larry Rix&quot;</span>
+	<span class="eitag">license</span><span class="esymbol">:</span> <span class="estring">&quot;MIT License&quot;</span>
+	<span class="eitag">source</span><span class="esymbol">:</span> <span class="estring">&quot;SIMPLE_AI_CLIENT - Unified AI Provider Library&quot;</span>
+
+<span class="ekeyword">end</span> <span class="ecomment">--</span> <span class="ecomment">class </span><a class="eclass" href="../src/ollama_embedding_client_short.html">OLLAMA_EMBEDDING_CLIENT</a></pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<a class="nav class" href="ollama_embedding_client_chart.html">Chart</a>
+<a class="nav class" href="ollama_embedding_client_links.html">Relations</a>
+<span class="nav class selected">Contracts</span>
+<span class="nav class goto">Go to: <input name="c" value="ollama_embedding_client"></span>
+</div></form><pre></pre>
+<p style="text-align:center;">Generated by <a href="http://www.eiffel.com">ISE EiffelStudio</a></p>
+</body>
+</html>
+

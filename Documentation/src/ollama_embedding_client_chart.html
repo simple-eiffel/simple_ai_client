@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="generator" content="ISE EiffelStudio version 25.02.9.8732 - win64">
+<meta name="description" content="Client for Ollama embedding API.  Generates vector embeddings from text using Ollama's local embedding models. Uses curl via SIMPLE_PROCESS_HELPER to communicate with Ollama server.  Supported Models: - nomic-embed-text (768 dimensions, recommended) - mxbai-embed-large (1024 dimensions) - all-minilm (384 dimensions, fastest)  Usage Example: Tcreate client.make Tclient.set_model (nomic-embed-text) Tresponse := client.embed (This is the text to embed) Tif response.is_success and then attached response.embedding as emb then TT-- Use emb.cosine_similarity, emb.to_blob, etc. Tend  Batch Processing: Tresponses := client.embed_batch (<<text1, text2, text3>>)  Design by Contract: - Text to embed must not be empty - Model must be set before embedding - Base URL must point to running Ollama server"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="copyright" content="Copyright (c) 2025, Larry Rix"/>
+<meta name="license" content="MIT License"/>
+<meta name="source" content="SIMPLE_AI_CLIENT - Unified AI Provider Library"/>
+<meta name="keywords" content="Eiffel class"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+<title>ollama_embedding_client Chart</title>
+<link rel="stylesheet" href="../default.css" type="text/css">
+<script type="text/javascript" src="../goto.html"></script>
+</head>
+<body>
+<pre></pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<span class="nav class selected">Chart</span>
+<a class="nav class" href="ollama_embedding_client_links.html">Relations</a>
+<a class="nav class" href="ollama_embedding_client_short.html">Contracts</a>
+<span class="nav class goto">Go to: <input name="c" value="ollama_embedding_client"></span>
+</div></form><pre><span class="ekeyword">class</span>
+	<a class="eclass" href="../src/ollama_embedding_client_chart.html">OLLAMA_EMBEDDING_CLIENT</a>
+
+<span class="ekeyword">General</span>
+	<span class="eitag">cluster</span><span class="esymbol">:</span> <a class="ecluster" href="../src/index.html">src</a>
+	<span class="eitag">description</span><span class="esymbol">:</span> 
+		<span class="estring">&quot;Client for Ollama embedding API.</span>
+		
+		<span class="estring">Generates vector embeddings from text using Ollama's local embedding models.</span>
+		<span class="estring">Uses curl via SIMPLE_PROCESS_HELPER to communicate with Ollama server.</span>
+		
+		<span class="estring">Supported Models:</span>
+		<span class="estring">- nomic-embed-text (768 dimensions, recommended)</span>
+		<span class="estring">- mxbai-embed-large (1024 dimensions)</span>
+		<span class="estring">- all-minilm (384 dimensions, fastest)</span>
+		
+		<span class="estring">Usage Example:</span>
+		<span class="estring">create client.make</span>
+		<span class="estring">client.set_model (%&quot;nomic-embed-text%&quot;)</span>
+		<span class="estring">response := client.embed (%&quot;This is the text to embed%&quot;)</span>
+		<span class="estring">if response.is_success and then attached response.embedding as emb then</span>
+		<span class="estring">-- Use emb.cosine_similarity, emb.to_blob, etc.</span>
+		<span class="estring">end</span>
+		
+		<span class="estring">Batch Processing:</span>
+		<span class="estring">responses := client.embed_batch (&lt;&lt;%&quot;text1%&quot;, %&quot;text2%&quot;, %&quot;text3%&quot;&gt;&gt;)</span>
+		
+		<span class="estring">Design by Contract:</span>
+		<span class="estring">- Text to embed must not be empty</span>
+		<span class="estring">- Model must be set before embedding</span>
+		<span class="estring">- Base URL must point to running Ollama server&quot;</span>
+	<span class="eitag">create</span><span class="esymbol">:</span> <a class="efeature" href="../src/ollama_embedding_client_short.html#f_make">make</a><span class="esymbol">,</span> <a class="efeature" href="../src/ollama_embedding_client_short.html#f_make_with_base_url">make_with_base_url</a>
+
+<span class="ekeyword">Ancestors</span>
+	<a class="eclass" href="../base/any_chart.html">ANY</a>
+
+<span class="ekeyword">Queries</span>
+	<span title="`base_url' is declared in `Current'"><a class="efeature" href="../src/ollama_embedding_client_short.html#f_base_url">base_url</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`embed' is declared in `Current'"><a class="efeature" href="../src/ollama_embedding_client_short.html#f_embed">embed</a> <span class="esymbol">(</span><span class="elocal">a_text</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../src/ai_embedding_response_chart.html">AI_EMBEDDING_RESPONSE</a></span>
+	<span title="`embed_batch' is declared in `Current'"><a class="efeature" href="../src/ollama_embedding_client_short.html#f_embed_batch">embed_batch</a> <span class="esymbol">(</span><span class="elocal">a_texts</span><span class="esymbol">:</span> <a class="eclass" href="../base/array_chart.html">ARRAY</a> <span class="esymbol">[</span><a class="eclass" href="../base/string_32_chart.html">STRING_32</a><span class="esymbol">]</span><span class="esymbol">)</span><span class="esymbol">:</span> <a class="eclass" href="../base/array_chart.html">ARRAY</a> <span class="esymbol">[</span><a class="eclass" href="../src/ai_embedding_response_chart.html">AI_EMBEDDING_RESPONSE</a><span class="esymbol">]</span></span>
+	<span title="`is_available' is declared in `Current'"><a class="efeature" href="../src/ollama_embedding_client_short.html#f_is_available">is_available</a><span class="esymbol">:</span> <a class="eclass" href="../base/boolean_chart.html">BOOLEAN</a></span>
+	<span title="`model' is declared in `Current'"><a class="efeature" href="../src/ollama_embedding_client_short.html#f_model">model</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a></span>
+	<span title="`provider_name' is declared in `Current'"><a class="efeature" href="../src/ollama_embedding_client_short.html#f_provider_name">Provider_name</a><span class="esymbol">:</span> <a class="eclass" href="../base/string_8_chart.html">STRING_8</a></span>
+
+<span class="ekeyword">Commands</span>
+	<span title="`set_model' is declared in `Current'"><a class="efeature" href="../src/ollama_embedding_client_short.html#f_set_model">set_model</a> <span class="esymbol">(</span><span class="elocal">a_model</span><span class="esymbol">:</span> <a class="eclass" href="../base/string_32_chart.html">STRING_32</a><span class="esymbol">)</span></span>
+
+<span class="ekeyword">Constraints</span>
+	<span class="etag">model attached</span>
+	<span class="etag">model not empty</span>
+	<span class="etag">base url attached</span>
+	<span class="etag">base url not empty</span>
+	<span class="etag">process helper attached</span>
+	<span class="etag">json attached</span>
+
+</pre><form class="nav" onsubmit="go_to('../',this.c.value);return false;">
+<div class="nav">
+<a class="nav hierarchy" href="../class_list.html">Classes</a>
+<a class="nav hierarchy" href="../cluster_list.html">Clusters</a>
+<a class="nav hierarchy" href="../cluster_hierarchy.html">Cluster hierarchy</a>
+<span class="nav class selected">Chart</span>
+<a class="nav class" href="ollama_embedding_client_links.html">Relations</a>
+<a class="nav class" href="ollama_embedding_client_short.html">Contracts</a>
+<span class="nav class goto">Go to: <input name="c" value="ollama_embedding_client"></span>
+</div></form><pre></pre>
+<p style="text-align:center;">Generated by <a href="http://www.eiffel.com">ISE EiffelStudio</a></p>
+</body>
+</html>
