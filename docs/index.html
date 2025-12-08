@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>simple_ai_client - AI API Client for Eiffel</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="images/logo.png">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="images/logo.png" alt="simple_* logo" class="logo">
+        </div>
+        <h1>simple_ai_client</h1>
+        <p class="tagline">AI API Client for Eiffel</p>
+        <div class="badges">
+            <span class="badge badge-version">v1.0.0</span>
+            <span class="badge badge-license">MIT</span>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#quick-start">Quick Start</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="https://github.com/simple-eiffel/simple_ai_client">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>
+                <strong>simple_ai_client</strong> provides an Eiffel client for AI APIs including
+                Claude and other LLM services. Includes support for vector embeddings and
+                semantic similarity search.
+            </p>
+            <p>
+                Part of the <strong>simple_*</strong> ecosystem of focused, single-purpose Eiffel libraries.
+            </p>
+        </section>
+
+        <section id="quick-start">
+            <h2>Quick Start</h2>
+
+            <div class="quick-start">
+                <h3>Installation</h3>
+                <p>Add to your ECF file:</p>
+<pre><code>&lt;library name="simple_ai_client" location="$SIMPLE_AI_CLIENT/simple_ai_client.ecf"/&gt;</code></pre>
+            </div>
+
+            <h3>Basic Usage</h3>
+<pre><code><span class="keyword">local</span>
+    client: <span class="type">AI_CLIENT</span>
+    response: <span class="type">STRING</span>
+<span class="keyword">do</span>
+    <span class="keyword">create</span> client.make_with_api_key (api_key)
+    response := client.complete (<span class="string">"Explain Design by Contract"</span>)
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="features">
+            <h2>Features</h2>
+            <ul>
+                <li>Claude API integration</li>
+                <li>Vector embedding support</li>
+                <li>Semantic similarity search</li>
+                <li>Environment variable configuration</li>
+                <li>Full Design by Contract support</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 simple_* ecosystem. MIT License.</p>
+        <p><a href="https://github.com/simple-eiffel">GitHub</a></p>
+    </footer>
+</body>
+</html>
