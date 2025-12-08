@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Testing config updates, AutoTest fixes, .gitignore cleanup
+- Add SCOOP concurrency capability
+- Migrate to simple_testing library
+- Add Claude API client and update embedding store tests
+- Replace framework with simple_process, use environment variables
+- removed log
+- Add vector embedding support for semantic similarity search
+- Test clean-up on test_architecture_task
+- init add and commit
+- first commit
+
 ## [1.0.0] - 2025-12-08
 
 ### Added
