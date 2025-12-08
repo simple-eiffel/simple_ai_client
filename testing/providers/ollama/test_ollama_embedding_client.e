@@ -13,7 +13,7 @@ note
 		Tests marked with 'execution/isolated' can be skipped if Ollama
 		is not available.
 	]"
-	testing: "type/manual"
+	testing: "covers"
 	date: "$Date$"
 	revision: "$Revision$"
 

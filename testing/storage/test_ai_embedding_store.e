@@ -11,7 +11,7 @@ note
 		- Running Ollama with nomic-embed-text model
 		- Write access for test database file
 	]"
-	testing: "type/manual"
+	testing: "covers"
 	date: "$Date$"
 	revision: "$Revision$"
 

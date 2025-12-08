@@ -5,7 +5,7 @@ note
 		Requires ANTHROPIC_API_KEY environment variable to be set.
 		Tests are marked as manual since they require network access and API key.
 	]"
-	testing: "type/manual"
+	testing: "covers"
 
 class
 	TEST_CLAUDE_CLIENT

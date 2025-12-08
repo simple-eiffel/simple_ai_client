@@ -9,7 +9,7 @@ note
 		- Normalization
 		- Edge cases
 	]"
-	testing: "type/manual"
+	testing: "covers"
 	date: "$Date$"
 	revision: "$Revision$"
 
