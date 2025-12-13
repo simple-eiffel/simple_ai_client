@@ -422,10 +422,10 @@ feature {NONE} -- Implementation
 
 				-- Build curl command with headers and JSON body, then execute
 				l_curl_cmd := build_curl_command (l_request.to_json_string)
-				l_output := process_helper.output_of_command (l_curl_cmd, Void)
+				l_output := process_helper.shell_output (l_curl_cmd, Void)
 
 				-- Parse curl output as JSON and convert to AI_RESPONSE
-				l_response_value := json.parse (l_output)
+				l_response_value := json.parse_response (l_output)
 				if attached l_response_value as al_value and then al_value.is_object then
 					l_response_obj := al_value.as_object
 					Result := parse_response (l_response_obj, l_output)

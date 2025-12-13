@@ -81,9 +81,9 @@ feature {NONE} -- Implementation
 			l_request.put_boolean (False, Key_stream).do_nothing
 			
 			l_curl_cmd := build_curl_command (Endpoint_chat, l_request.to_json_string)
-			l_output := process_helper.output_of_command (l_curl_cmd, Void)
+			l_output := process_helper.shell_output (l_curl_cmd, Void)
 			
-			l_response_value := json.parse (l_output)
+			l_response_value := json.parse_response (l_output)
 			if attached l_response_value as al_value and then al_value.is_object then
 				l_response_obj := al_value.as_object
 				Result := parse_chat_response (l_response_obj)

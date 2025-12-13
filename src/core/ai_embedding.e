@@ -45,7 +45,7 @@ feature {NONE} -- Initialization
 			i: INTEGER
 		do
 			create l_json
-			l_value := l_json.parse (a_json)
+			l_value := l_json.deserialize (a_json)
 			if attached l_value as al_val and then al_val.is_array then
 				l_array := al_val.as_array
 				create vector.make_filled (0.0, 1, l_array.count)

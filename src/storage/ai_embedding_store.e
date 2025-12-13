@@ -40,7 +40,7 @@ feature -- Storage
 					+ escape_sql (a_error) + "', '" 
 					+ escape_sql (l_emb.to_json_array) + "', '" 
 					+ escape_sql (a_resolution) + "')"
-				db.execute (l_sql)
+				db.run_sql (l_sql)
 				Result := not db.has_error
 			end
 		end
@@ -57,7 +57,7 @@ feature -- Storage
 					+ escape_sql (a_description) + "', '"
 					+ escape_sql (l_emb.to_json_array) + "', '"
 					+ escape_sql (a_code) + "')"
-				db.execute (l_sql)
+				db.run_sql (l_sql)
 				Result := not db.has_error
 			end
 		end
@@ -74,7 +74,7 @@ feature -- Storage
 					+ escape_sql (a_spec) + "', '"
 					+ escape_sql (l_emb.to_json_array) + "', '"
 					+ escape_sql (a_source) + "', 'generated')"
-				db.execute (l_sql)
+				db.run_sql (l_sql)
 				Result := not db.has_error
 			end
 		end
@@ -94,7 +94,7 @@ feature -- Search
 			l_response := embedding_client.embed (a_query)
 			if l_response.is_success and then attached l_response.embedding as l_qe then
 				l_query_emb := l_qe
-				l_result := db.query ("SELECT id, error_text, error_embedding, resolution_code FROM error_resolutions")
+				l_result := db.fetch ("SELECT id, error_text, error_embedding, resolution_code FROM error_resolutions")
 				from i := 1 until i > l_result.count loop
 					l_row := l_result [i]
 					create l_stored_emb.make_from_json (l_row.string_value ("error_embedding"))
@@ -124,7 +124,7 @@ feature -- Search
 			l_response := embedding_client.embed (a_query)
 			if l_response.is_success and then attached l_response.embedding as l_qe then
 				l_query_emb := l_qe
-				l_result := db.query ("SELECT pattern_name, description, description_embedding, example_code FROM code_patterns")
+				l_result := db.fetch ("SELECT pattern_name, description, description_embedding, example_code FROM code_patterns")
 				from i := 1 until i > l_result.count loop
 					l_row := l_result [i]
 					create l_stored_emb.make_from_json (l_row.string_value ("description_embedding"))
@@ -154,7 +154,7 @@ feature -- Search
 			l_response := embedding_client.embed (a_query)
 			if l_response.is_success and then attached l_response.embedding as l_qe then
 				l_query_emb := l_qe
-				l_result := db.query ("SELECT class_name, specification, spec_embedding, source_code FROM generated_classes")
+				l_result := db.fetch ("SELECT class_name, specification, spec_embedding, source_code FROM generated_classes")
 				from i := 1 until i > l_result.count loop
 					l_row := l_result [i]
 					create l_stored_emb.make_from_json (l_row.string_value ("spec_embedding"))
@@ -177,7 +177,7 @@ feature -- Statistics
 		local
 			l_result: SIMPLE_SQL_RESULT
 		do
-			l_result := db.query ("SELECT COUNT(*) as cnt FROM error_resolutions")
+			l_result := db.fetch ("SELECT COUNT(*) as cnt FROM error_resolutions")
 			if not l_result.is_empty then
 				Result := l_result.first.integer_value ("cnt")
 			end
@@ -187,7 +187,7 @@ feature -- Statistics
 		local
 			l_result: SIMPLE_SQL_RESULT
 		do
-			l_result := db.query ("SELECT COUNT(*) as cnt FROM code_patterns")
+			l_result := db.fetch ("SELECT COUNT(*) as cnt FROM code_patterns")
 			if not l_result.is_empty then
 				Result := l_result.first.integer_value ("cnt")
 			end
@@ -197,7 +197,7 @@ feature -- Statistics
 		local
 			l_result: SIMPLE_SQL_RESULT
 		do
-			l_result := db.query ("SELECT COUNT(*) as cnt FROM generated_classes")
+			l_result := db.fetch ("SELECT COUNT(*) as cnt FROM generated_classes")
 			if not l_result.is_empty then
 				Result := l_result.first.integer_value ("cnt")
 			end
@@ -207,9 +207,9 @@ feature {NONE} -- Implementation
 
 	ensure_tables_exist
 		do
-			db.execute ("CREATE TABLE IF NOT EXISTS error_resolutions (id INTEGER PRIMARY KEY AUTOINCREMENT, error_text TEXT, error_embedding TEXT, resolution_code TEXT)")
-			db.execute ("CREATE TABLE IF NOT EXISTS code_patterns (id INTEGER PRIMARY KEY AUTOINCREMENT, pattern_name TEXT, description TEXT, description_embedding TEXT, example_code TEXT)")
-			db.execute ("CREATE TABLE IF NOT EXISTS generated_classes (id INTEGER PRIMARY KEY AUTOINCREMENT, class_name TEXT, specification TEXT, spec_embedding TEXT, source_code TEXT, status TEXT)")
+			db.run_sql ("CREATE TABLE IF NOT EXISTS error_resolutions (id INTEGER PRIMARY KEY AUTOINCREMENT, error_text TEXT, error_embedding TEXT, resolution_code TEXT)")
+			db.run_sql ("CREATE TABLE IF NOT EXISTS code_patterns (id INTEGER PRIMARY KEY AUTOINCREMENT, pattern_name TEXT, description TEXT, description_embedding TEXT, example_code TEXT)")
+			db.run_sql ("CREATE TABLE IF NOT EXISTS generated_classes (id INTEGER PRIMARY KEY AUTOINCREMENT, class_name TEXT, specification TEXT, spec_embedding TEXT, source_code TEXT, status TEXT)")
 		end
 
 	escape_sql (a_str: STRING_32): STRING_8

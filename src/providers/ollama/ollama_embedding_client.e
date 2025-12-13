@@ -105,7 +105,7 @@ feature -- Embedding operations
 
 			-- Execute curl command
 			l_curl_cmd := build_curl_command (Endpoint_embeddings, l_request.to_json_string)
-			l_output := process_helper.output_of_command (l_curl_cmd, Void)
+			l_output := process_helper.shell_output (l_curl_cmd, Void)
 
 			-- Parse response
 			Result := parse_embedding_response (l_output, a_text)
@@ -193,7 +193,7 @@ feature {NONE} -- Implementation
 			i: INTEGER
 		do
 			if not a_output.is_empty then
-				l_json_value := json.parse (a_output)
+				l_json_value := json.parse_response (a_output)
 			end
 
 			if attached l_json_value as al_value and then al_value.is_object then
