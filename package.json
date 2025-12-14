@@ -1,0 +1,9 @@
+{
+  "name": "simple_ai_client",
+  "version": "0.1.0",
+  "description": "Simple Eiffel library: simple_ai_client",
+  "author": "Larry Rix",
+  "license": "MIT",
+  "category": "ai",
+  "keywords": ["ai", "llm", "openai", "anthropic", "claude"]
+}
