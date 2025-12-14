@@ -16,7 +16,7 @@
 			<void_safety support="all"/>
 		</capability>
 		<library name="base" location="$ISE_LIBRARY\library\base\base.ecf"/>
-		<library name="logging" location="$ISE_LIBRARY\library\runtime\logging\logging.ecf"/>
+		<library name="simple_logger" location="$SIMPLE_LOGGER/simple_logger.ecf"/>
 		<library name="simple_json" location="$SIMPLE_JSON\simple_json.ecf"/>
 		<library name="simple_process" location="$SIMPLE_PROCESS\simple_process.ecf"/>
 		<library name="simple_sql" location="$SIMPLE_SQL\simple_sql.ecf"/>

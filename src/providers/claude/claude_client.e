@@ -182,8 +182,8 @@ feature -- Logging
 			stderr_logging_enabled: is_stderr_logging_enabled
 		end
 
-	enable_logging (a_logger: LOG_LOGGING_FACILITY)
-			-- Enable usage logging to provided LOG_LOGGING_FACILITY
+	enable_logging (a_logger: SIMPLE_LOGGER)
+			-- Enable usage logging to provided SIMPLE_LOGGER
 		require
 			logger_attached: a_logger /= Void
 		do
@@ -222,15 +222,15 @@ feature -- Logging
 			-- Is stderr logging enabled?
 
 	is_facility_logging_enabled: BOOLEAN
-			-- Is LOG_LOGGING_FACILITY logging enabled?
+			-- Is SIMPLE_LOGGER logging enabled?
 
 feature {NONE} -- Logging: Implementation
 
 	log_file: detachable PLAIN_TEXT_FILE
 			-- Log file for file-based logging
 
-	logger: detachable LOG_LOGGING_FACILITY
-			-- Optional LOG_LOGGING_FACILITY logger
+	logger: detachable SIMPLE_LOGGER
+			-- Optional SIMPLE_LOGGER logger
 
 	log_message (a_message: STRING)
 			-- Write message to all enabled log destinations
@@ -247,7 +247,7 @@ feature {NONE} -- Logging: Implementation
 				al_file.flush
 			end
 			if is_facility_logging_enabled and attached logger as al_logger then
-				al_logger.write_information (a_message)
+				al_logger.log_info (a_message)
 			end
 		end
 
