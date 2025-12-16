@@ -22,14 +22,14 @@ Part of the [Simple Eiffel](https://github.com/simple-eiffel) ecosystem.
 
 ## Installation
 
-1. Set environment variable:
+1. Set environment variable (one-time setup for all simple_* libraries):
 ```bash
-export SIMPLE_AI_CLIENT=/path/to/simple_ai_client
+export SIMPLE_EIFFEL=/d/prod
 ```
 
 2. Add to ECF:
 ```xml
-<library name="simple_ai_client" location="$SIMPLE_AI_CLIENT/simple_ai_client.ecf"/>
+<library name="simple_ai_client" location="$SIMPLE_EIFFEL/simple_ai_client/simple_ai_client.ecf"/>
 ```
 
 ## Quick Start (Zero-Configuration)
