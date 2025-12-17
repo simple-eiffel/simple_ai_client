@@ -41,7 +41,7 @@ feature {NONE} -- Initialization
 			-- Create quick AI facade.
 			-- Defaults to Ollama with llama3 model.
 		do
-			create logger.make ("ai_quick")
+			create logger.make
 			use_ollama
 		end
 
