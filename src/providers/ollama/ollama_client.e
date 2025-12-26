@@ -57,7 +57,7 @@ feature -- Element change
 feature {NONE} -- Implementation
 
 	execute_chat (a_messages: ARRAY [AI_MESSAGE]; a_options: detachable ANY): AI_RESPONSE
-			-- Execute chat via curl
+			-- Execute chat via curl using temp file for JSON body
 		local
 			l_request: SIMPLE_JSON_OBJECT
 			l_messages_array: SIMPLE_JSON_ARRAY
@@ -66,6 +66,9 @@ feature {NONE} -- Implementation
 			l_output: STRING_32
 			l_response_value: SIMPLE_JSON_VALUE
 			l_response_obj: SIMPLE_JSON_OBJECT
+			l_json_body: STRING_32
+			l_temp_file: RAW_FILE
+			l_temp_path: STRING_32
 		do
 			create l_request.make
 			l_request.put_string (model, Key_model).do_nothing
@@ -80,15 +83,36 @@ feature {NONE} -- Implementation
 			l_request.put_array (l_messages_array, Key_messages).do_nothing
 			l_request.put_boolean (False, Key_stream).do_nothing
 			
-			l_curl_cmd := build_curl_command (Endpoint_chat, l_request.to_json_string)
+			l_json_body := l_request.to_json_string
+			
+			-- Write JSON to temp file to avoid escaping issues
+			l_temp_path := {STRING_32} "ollama_request.json"
+			create l_temp_file.make_create_read_write (l_temp_path.to_string_8)
+			l_temp_file.put_string (l_json_body.to_string_8)
+			l_temp_file.close
+			
+			-- Build curl command using file
+			create l_curl_cmd.make (200)
+			l_curl_cmd.append ("curl.exe -s -X POST ")
+			l_curl_cmd.append (base_url)
+			l_curl_cmd.append (Endpoint_chat)
+			l_curl_cmd.append (" -H %"Content-Type: application/json%" -d @")
+			l_curl_cmd.append (l_temp_path)
+			
 			l_output := process_helper.shell_output (l_curl_cmd, Void)
+			
+			-- Clean up temp file
+			create l_temp_file.make_with_name (l_temp_path.to_string_8)
+			if l_temp_file.exists then
+				l_temp_file.delete
+			end
 			
 			l_response_value := json.parse_response (l_output)
 			if attached l_response_value as al_value and then al_value.is_object then
 				l_response_obj := al_value.as_object
 				Result := parse_chat_response (l_response_obj)
 			else
-				Result := create_error_response ("Failed to parse Ollama response")
+				Result := create_error_response ("Failed to parse Ollama response: " + l_output.head (100))
 			end
 		end
 

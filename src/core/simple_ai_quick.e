@@ -84,7 +84,7 @@ feature -- Provider Configuration
 			api_key_not_empty: not a_api_key.is_empty
 		do
 			logger.info ("Configuring Claude provider")
-			create {CLAUDE_CLIENT} client.make (a_api_key)
+			create {CLAUDE_CLIENT} client.make_with_api_key (a_api_key)
 			provider := "claude"
 			current_model := "claude-sonnet-4-20250514"
 		ensure
@@ -136,7 +136,7 @@ feature -- Basic Queries
 			last_error := ""
 			if attached client as c then
 				if attached c.ask (a_question.to_string_32) as resp then
-					Result := resp.content.to_string_8
+					Result := resp.text.to_string_8
 					logger.debug_log ("Response: " + Result.head (50) + "...")
 				else
 					Result := ""
@@ -163,7 +163,7 @@ feature -- Basic Queries
 			last_error := ""
 			if attached client as c then
 				if attached c.ask_with_system (a_role.to_string_32, a_question.to_string_32) as resp then
-					Result := resp.content.to_string_8
+					Result := resp.text.to_string_8
 				else
 					Result := ""
 					last_error := "No response from AI"
