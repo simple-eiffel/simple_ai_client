@@ -46,6 +46,66 @@ feature -- Access
 	base_url: STRING_32
 			-- Ollama server base URL
 
+feature -- Status report
+
+	is_available: BOOLEAN
+			-- Is Ollama server available (can connect)?
+		local
+			l_curl_cmd: STRING_32
+			l_output: STRING_32
+		do
+			-- Simple check: try to list models
+			create l_curl_cmd.make (100)
+			l_curl_cmd.append ("curl.exe -s --connect-timeout 2 ")
+			l_curl_cmd.append (base_url)
+			l_curl_cmd.append (Endpoint_tags)
+			l_output := process_helper.shell_output (l_curl_cmd, Void)
+			Result := not l_output.is_empty and then l_output.has_substring ("models")
+		end
+
+feature -- Model listing
+
+	list_models: ARRAYED_LIST [STRING_32]
+			-- Get list of available Ollama models.
+			-- Returns empty list if server is unavailable.
+		local
+			l_curl_cmd: STRING_32
+			l_output: STRING_32
+			l_response_value: SIMPLE_JSON_VALUE
+			l_response_obj: SIMPLE_JSON_OBJECT
+			l_models_array: SIMPLE_JSON_ARRAY
+			i: INTEGER
+		do
+			create Result.make (10)
+
+			-- Build GET request to /api/tags
+			create l_curl_cmd.make (100)
+			l_curl_cmd.append ("curl.exe -s ")
+			l_curl_cmd.append (base_url)
+			l_curl_cmd.append (Endpoint_tags)
+
+			l_output := process_helper.shell_output (l_curl_cmd, Void)
+
+			-- Parse JSON response
+			l_response_value := json.parse_response (l_output)
+			if attached l_response_value as al_value and then al_value.is_object then
+				l_response_obj := al_value.as_object
+				if attached l_response_obj.array_item (Key_models) as al_models then
+					l_models_array := al_models
+					from i := 1 until i > l_models_array.count loop
+						if attached l_models_array.object_item (i) as al_model_obj then
+							if attached al_model_obj.string_item (Key_name) as al_name then
+								Result.extend (al_name)
+							end
+						end
+						i := i + 1
+					end
+				end
+			end
+		ensure
+			result_attached: Result /= Void
+		end
+
 feature -- Element change
 
 	set_model (a_model: STRING_32)
@@ -187,8 +247,11 @@ feature {NONE} -- Constants
 	Default_model: STRING_32 = "llama3"
 
 	Endpoint_chat: STRING_32 = "/api/chat"
+	Endpoint_tags: STRING_32 = "/api/tags"
 
 	Key_model: STRING_32 = "model"
+	Key_models: STRING_32 = "models"
+	Key_name: STRING_32 = "name"
 	Key_messages: STRING_32 = "messages"
 	Key_role: STRING_32 = "role"
 	Key_content: STRING_32 = "content"

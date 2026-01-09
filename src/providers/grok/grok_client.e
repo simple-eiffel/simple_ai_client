@@ -1,5 +1,18 @@
 note
-	description: "Grok AI client using xAI API (OpenAI-compatible)"
+	description: "[
+		Grok AI client using xAI API (OpenAI-compatible).
+
+		API key is read from GROK_API_KEY environment variable.
+
+		Supported Models:
+		- grok-3 (default, most capable)
+		- grok-3-fast (faster responses)
+
+		Design by Contract:
+		- API key must be set (via environment or explicit)
+		- All operations require valid API key
+		- Responses always attached (error or success)
+	]"
 	date: "$Date$"
 	revision: "$Revision$"
 
@@ -10,11 +23,31 @@ inherit
 	AI_CLIENT
 
 create
+	make,
 	make_with_api_key
 
 feature {NONE} -- Initialization
 
+	make
+			-- Create with API key from environment variable GROK_API_KEY
+		local
+			l_env: EXECUTION_ENVIRONMENT
+		do
+			create l_env
+			if attached l_env.item (Env_api_key_name) as al_key then
+				api_key := al_key.to_string_32
+			else
+				create api_key.make_empty
+			end
+			model := Default_model
+			create process_helper
+			create json
+		ensure
+			model_set: model ~ Default_model
+		end
+
 	make_with_api_key (a_key: STRING_32)
+			-- Create with explicit API key
 		require
 			key_not_empty: not a_key.is_empty
 		do
@@ -30,8 +63,29 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	model: STRING_32
+			-- Current model (e.g., "grok-3")
+
 	provider_name: STRING_8 = "grok"
+			-- Provider identifier
+
 	api_key: STRING_32
+			-- xAI API key
+
+feature -- Status report
+
+	has_api_key: BOOLEAN
+			-- Is API key configured?
+		do
+			Result := not api_key.is_empty
+		ensure
+			definition: Result = not api_key.is_empty
+		end
+
+	is_available: BOOLEAN
+			-- Is Grok API available (has key)?
+		do
+			Result := has_api_key
+		end
 
 feature -- Element change
 
@@ -154,7 +208,13 @@ feature {NONE} -- Implementation: Attributes
 feature {NONE} -- Constants
 
 	Api_endpoint: STRING_32 = "https://api.x.ai/v1/chat/completions"
+			-- xAI API endpoint
+
 	Default_model: STRING_32 = "grok-3"
+			-- Default model (most capable)
+
+	Env_api_key_name: STRING_32 = "GROK_API_KEY"
+			-- Environment variable name for API key
 
 invariant
 	api_key_attached: api_key /= Void
