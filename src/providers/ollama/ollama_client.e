@@ -63,6 +63,24 @@ feature -- Status report
 			Result := not l_output.is_empty and then l_output.has_substring ("models")
 		end
 
+feature -- Model validation
+
+	is_valid_model (a_model: STRING_32): BOOLEAN
+			-- Is `a_model' available on this Ollama server?
+			-- Queries the server dynamically to check installed models.
+		do
+			Result := across supported_models as m some m.same_string (a_model) end
+		end
+
+	supported_models: ARRAYED_LIST [STRING_32]
+			-- List of models available on this Ollama server.
+			-- Queries the server dynamically (unlike cloud providers).
+		do
+			Result := list_models
+		ensure then
+			-- May be empty if server unavailable
+		end
+
 feature -- Model listing
 
 	list_models: ARRAYED_LIST [STRING_32]

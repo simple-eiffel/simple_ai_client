@@ -339,30 +339,63 @@ feature -- Element change
 			key_set: api_key = a_key
 		end
 
+feature -- Model validation
+
+	is_valid_model (a_model: STRING_32): BOOLEAN
+			-- Is `a_model' a valid Claude model?
+			-- Checks against known Claude model identifiers.
+		do
+			Result := across supported_models as m some m.same_string (a_model) end
+		end
+
+	supported_models: ARRAYED_LIST [STRING_32]
+			-- List of supported Claude model identifiers.
+			-- Includes both versioned and alias names.
+		do
+			create Result.make (15)
+			-- Claude 4.5 models (current generation)
+			Result.extend (Model_opus_45)
+			Result.extend (Model_sonnet_45)
+			Result.extend (Model_haiku_45)
+			-- Claude 4 models
+			Result.extend (Model_opus)
+			Result.extend (Model_sonnet)
+			Result.extend (Model_haiku)
+			-- Aliases (short names)
+			Result.extend ({STRING_32} "claude-opus-4.5")
+			Result.extend ({STRING_32} "claude-sonnet-4.5")
+			Result.extend ({STRING_32} "claude-haiku-4.5")
+			Result.extend ({STRING_32} "claude-opus-4")
+			Result.extend ({STRING_32} "claude-sonnet-4")
+			Result.extend ({STRING_32} "claude-haiku-4")
+		ensure then
+			has_models: Result.count >= 6
+		end
+
 feature -- Model selection helpers
 
 	use_sonnet
 			-- Use Claude Sonnet 4.5 (balanced speed/capability)
 		do
-			set_model (Model_sonnet)
+			set_model (Model_sonnet_45)
 		ensure
-			model_set: model ~ Model_sonnet
+			model_set: model ~ Model_sonnet_45
 		end
 
 	use_opus
 			-- Use Claude Opus 4.5 (most capable)
 		do
-			set_model (Model_opus)
+			set_model (Model_opus_45)
 		ensure
-			model_set: model ~ Model_opus
+			model_set: model ~ Model_opus_45
 		end
 
 	use_haiku
 			-- Use Claude Haiku 4.5 (fastest)
 		do
-			set_model (Model_haiku)
+			set_model (Model_haiku_45)
 		ensure
-			model_set: model ~ Model_haiku
+			model_set: model ~ Model_haiku_45
 		end
 
 feature {NONE} -- Implementation
@@ -576,16 +609,27 @@ feature {NONE} -- Constants: API
 feature -- Constants: Models
 
 	Default_model: STRING_32 = "claude-sonnet-4-5-20250929"
-			-- Default model (Sonnet - balanced)
+			-- Default model (Sonnet 4.5 - balanced)
 
-	Model_sonnet: STRING_32 = "claude-sonnet-4-5-20250929"
-			-- Claude Sonnet 4.5 - fast and capable
-
-	Model_opus: STRING_32 = "claude-opus-4-5-20251101"
+	-- Claude 4.5 models (current generation)
+	Model_opus_45: STRING_32 = "claude-opus-4-5-20251101"
 			-- Claude Opus 4.5 - most capable
 
-	Model_haiku: STRING_32 = "claude-haiku-4-5-20251001"
+	Model_sonnet_45: STRING_32 = "claude-sonnet-4-5-20250929"
+			-- Claude Sonnet 4.5 - fast and capable
+
+	Model_haiku_45: STRING_32 = "claude-haiku-4-5-20251001"
 			-- Claude Haiku 4.5 - fastest
+
+	-- Claude 4 models (previous generation)
+	Model_opus: STRING_32 = "claude-opus-4-20250514"
+			-- Claude Opus 4 - previous most capable
+
+	Model_sonnet: STRING_32 = "claude-sonnet-4-20250514"
+			-- Claude Sonnet 4 - previous balanced
+
+	Model_haiku: STRING_32 = "claude-haiku-4-20250514"
+			-- Claude Haiku 4 - previous fastest
 
 feature -- Constants: Pricing (USD per million tokens)
 

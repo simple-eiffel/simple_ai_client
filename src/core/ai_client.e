@@ -27,6 +27,8 @@ note
 		- provider_name: Provider identifier
 		- set_model: Change active model
 		- execute_chat: Provider-specific chat implementation
+		- is_valid_model: Model validation
+		- supported_models: List of supported model identifiers
 	]"
 	date: "$Date$"
 	revision: "$Revision$"
@@ -56,6 +58,27 @@ feature -- Access
 			-- Current verbosity level
 		attribute
 			Result := Verbosity_concise
+		end
+
+feature -- Model validation
+
+	is_valid_model (a_model: STRING_32): BOOLEAN
+			-- Is `a_model' a valid/supported model for this provider?
+			-- Cloud providers check against known model list.
+			-- Local providers (Ollama) may query the server dynamically.
+		require
+			model_attached: a_model /= Void
+			model_not_empty: not a_model.is_empty
+		deferred
+		end
+
+	supported_models: ARRAYED_LIST [STRING_32]
+			-- List of supported model identifiers for this provider.
+			-- For cloud providers, returns known/documented models.
+			-- For local providers (Ollama), may query server for installed models.
+		deferred
+		ensure
+			result_attached: Result /= Void
 		end
 
 feature -- Basic operations

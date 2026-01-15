@@ -94,6 +94,64 @@ feature -- Element change
 			model := a_model
 		end
 
+feature -- Model validation
+
+	is_valid_model (a_model: STRING_32): BOOLEAN
+			-- Is `a_model' a valid Grok model?
+		do
+			Result := across supported_models as m some m.same_string (a_model) end
+		end
+
+	supported_models: ARRAYED_LIST [STRING_32]
+			-- List of supported Grok model identifiers.
+		do
+			create Result.make (15)
+			-- Grok 4.1 family
+			Result.extend (Model_grok41_fast_reasoning)
+			Result.extend (Model_grok41_fast_non_reasoning)
+			-- Grok 4 family
+			Result.extend (Model_grok4)
+			Result.extend (Model_grok4_fast_reasoning)
+			Result.extend (Model_grok4_fast_non_reasoning)
+			-- Grok 3 family
+			Result.extend (Model_grok3)
+			Result.extend (Model_grok3_mini)
+			-- Grok 2 family
+			Result.extend (Model_grok2)
+			Result.extend (Model_grok2_vision)
+			Result.extend (Model_grok2_image)
+			-- Specialized
+			Result.extend (Model_grok_code_fast)
+		ensure then
+			has_models: Result.count >= 8
+		end
+
+feature -- Model selection helpers
+
+	use_grok4
+			-- Use Grok 4 (most capable reasoning)
+		do
+			set_model (Model_grok4)
+		ensure
+			model_set: model ~ Model_grok4
+		end
+
+	use_grok3
+			-- Use Grok 3 (balanced)
+		do
+			set_model (Model_grok3)
+		ensure
+			model_set: model ~ Model_grok3
+		end
+
+	use_grok3_mini
+			-- Use Grok 3 Mini (fast, budget-friendly)
+		do
+			set_model (Model_grok3_mini)
+		ensure
+			model_set: model ~ Model_grok3_mini
+		end
+
 feature {NONE} -- Implementation
 
 	execute_chat (a_messages: ARRAY [AI_MESSAGE]; a_options: detachable ANY): AI_RESPONSE
@@ -205,16 +263,56 @@ feature {NONE} -- Implementation: Attributes
 	process_helper: SIMPLE_PROCESS_HELPER
 	json: SIMPLE_JSON
 
-feature {NONE} -- Constants
+feature {NONE} -- Constants: API
 
 	Api_endpoint: STRING_32 = "https://api.x.ai/v1/chat/completions"
 			-- xAI API endpoint
 
-	Default_model: STRING_32 = "grok-3"
-			-- Default model (most capable)
-
 	Env_api_key_name: STRING_32 = "GROK_API_KEY"
 			-- Environment variable name for API key
+
+feature -- Constants: Models
+
+	Default_model: STRING_32 = "grok-3"
+			-- Default model (balanced)
+
+	-- Grok 4.1 family
+	Model_grok41_fast_reasoning: STRING_32 = "grok-4-1-fast-reasoning"
+			-- Grok 4.1 fast reasoning
+
+	Model_grok41_fast_non_reasoning: STRING_32 = "grok-4-1-fast-non-reasoning"
+			-- Grok 4.1 fast non-reasoning
+
+	-- Grok 4 family
+	Model_grok4: STRING_32 = "grok-4"
+			-- Grok 4 - most capable reasoning
+
+	Model_grok4_fast_reasoning: STRING_32 = "grok-4-fast-reasoning"
+			-- Grok 4 fast reasoning
+
+	Model_grok4_fast_non_reasoning: STRING_32 = "grok-4-fast-non-reasoning"
+			-- Grok 4 fast non-reasoning
+
+	-- Grok 3 family
+	Model_grok3: STRING_32 = "grok-3"
+			-- Grok 3 - balanced
+
+	Model_grok3_mini: STRING_32 = "grok-3-mini"
+			-- Grok 3 Mini - fast, budget-friendly
+
+	-- Grok 2 family
+	Model_grok2: STRING_32 = "grok-2-1212"
+			-- Grok 2 (December 2024 version)
+
+	Model_grok2_vision: STRING_32 = "grok-2-vision-1212"
+			-- Grok 2 Vision
+
+	Model_grok2_image: STRING_32 = "grok-2-image-1212"
+			-- Grok 2 Image generation
+
+	-- Specialized models
+	Model_grok_code_fast: STRING_32 = "grok-code-fast-1"
+			-- Grok Code Fast - optimized for coding
 
 invariant
 	api_key_attached: api_key /= Void

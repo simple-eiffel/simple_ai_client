@@ -6,9 +6,9 @@ note
 		API key is read from GOOGLE_AI_KEY environment variable.
 
 		Supported Models:
-		- gemini-1.5-flash (default, fast and efficient)
-		- gemini-1.5-pro (more capable)
-		- gemini-2.0-flash-exp (experimental)
+		- gemini-2.0-flash (default, fast and efficient)
+		- gemini-2.5-flash (latest fast model)
+		- gemini-2.5-pro (most capable)
 
 		API Documentation:
 		https://ai.google.dev/gemini-api/docs
@@ -110,10 +110,36 @@ feature -- Element change
 			key_set: api_key = a_key
 		end
 
+feature -- Model validation
+
+	is_valid_model (a_model: STRING_32): BOOLEAN
+			-- Is `a_model' a valid Gemini model?
+		do
+			Result := across supported_models as m some m.same_string (a_model) end
+		end
+
+	supported_models: ARRAYED_LIST [STRING_32]
+			-- List of supported Gemini model identifiers.
+		do
+			create Result.make (15)
+			-- Gemini 3 (preview)
+			Result.extend (Model_gemini3_pro_preview)
+			Result.extend (Model_gemini3_flash_preview)
+			-- Gemini 2.5
+			Result.extend (Model_pro)
+			Result.extend (Model_flash_25)
+			Result.extend (Model_flash_25_lite)
+			-- Gemini 2.0
+			Result.extend (Model_flash)
+			Result.extend (Model_flash_lite)
+		ensure then
+			has_models: Result.count >= 5
+		end
+
 feature -- Model selection helpers
 
 	use_flash
-			-- Use Gemini 1.5 Flash (fast and efficient)
+			-- Use Gemini 2.0 Flash (fast and efficient)
 		do
 			set_model (Model_flash)
 		ensure
@@ -121,11 +147,19 @@ feature -- Model selection helpers
 		end
 
 	use_pro
-			-- Use Gemini 1.5 Pro (more capable)
+			-- Use Gemini 2.5 Pro (most capable)
 		do
 			set_model (Model_pro)
 		ensure
 			model_set: model ~ Model_pro
+		end
+
+	use_flash_25
+			-- Use Gemini 2.5 Flash (latest fast model)
+		do
+			set_model (Model_flash_25)
+		ensure
+			model_set: model ~ Model_flash_25
 		end
 
 feature {NONE} -- Implementation
@@ -306,14 +340,32 @@ feature {NONE} -- Constants: API
 
 feature -- Constants: Models
 
-	Default_model: STRING_32 = "gemini-1.5-flash"
-			-- Default model (fast and efficient)
+	Default_model: STRING_32 = "gemini-2.5-flash"
+			-- Default model (latest fast)
 
-	Model_flash: STRING_32 = "gemini-1.5-flash"
-			-- Gemini 1.5 Flash - fast and efficient
+	-- Gemini 3 (preview)
+	Model_gemini3_pro_preview: STRING_32 = "gemini-3-pro-preview"
+			-- Gemini 3 Pro preview - reasoning-first model
 
-	Model_pro: STRING_32 = "gemini-1.5-pro"
-			-- Gemini 1.5 Pro - more capable
+	Model_gemini3_flash_preview: STRING_32 = "gemini-3-flash-preview"
+			-- Gemini 3 Flash preview - complex multimodal
+
+	-- Gemini 2.5
+	Model_pro: STRING_32 = "gemini-2.5-pro"
+			-- Gemini 2.5 Pro - most capable stable
+
+	Model_flash_25: STRING_32 = "gemini-2.5-flash"
+			-- Gemini 2.5 Flash - latest fast model
+
+	Model_flash_25_lite: STRING_32 = "gemini-2.5-flash-lite"
+			-- Gemini 2.5 Flash Lite - low-cost high-performance
+
+	-- Gemini 2.0 (retiring March 2026)
+	Model_flash: STRING_32 = "gemini-2.0-flash"
+			-- Gemini 2.0 Flash - fast and efficient
+
+	Model_flash_lite: STRING_32 = "gemini-2.0-flash-lite"
+			-- Gemini 2.0 Flash Lite - ultra-efficient
 
 feature {NONE} -- Constants: JSON Keys
 

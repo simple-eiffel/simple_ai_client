@@ -111,6 +111,41 @@ feature -- Element change
 			key_set: api_key = a_key
 		end
 
+feature -- Model validation
+
+	is_valid_model (a_model: STRING_32): BOOLEAN
+			-- Is `a_model' a valid OpenAI model?
+		do
+			Result := across supported_models as m some m.same_string (a_model) end
+		end
+
+	supported_models: ARRAYED_LIST [STRING_32]
+			-- List of supported OpenAI model identifiers.
+		do
+			create Result.make (20)
+			-- GPT-4.1 family (latest)
+			Result.extend (Model_gpt41)
+			Result.extend (Model_gpt41_mini)
+			Result.extend (Model_gpt41_nano)
+			-- GPT-4o family
+			Result.extend (Model_gpt4o)
+			Result.extend (Model_gpt4o_mini)
+			-- GPT-4 Turbo
+			Result.extend (Model_gpt4_turbo)
+			-- O-series reasoning models
+			Result.extend (Model_o3)
+			Result.extend (Model_o3_mini)
+			Result.extend (Model_o3_pro)
+			Result.extend (Model_o1)
+			Result.extend (Model_o1_pro)
+			-- GPT-5 family
+			Result.extend (Model_gpt5)
+			Result.extend (Model_gpt51)
+			Result.extend (Model_gpt52)
+		ensure then
+			has_models: Result.count >= 10
+		end
+
 feature -- Model selection helpers
 
 	use_gpt4o_mini
@@ -127,6 +162,22 @@ feature -- Model selection helpers
 			set_model (Model_gpt4o)
 		ensure
 			model_set: model ~ Model_gpt4o
+		end
+
+	use_gpt41
+			-- Use GPT-4.1 (latest non-reasoning)
+		do
+			set_model (Model_gpt41)
+		ensure
+			model_set: model ~ Model_gpt41
+		end
+
+	use_o3
+			-- Use o3 (powerful reasoning)
+		do
+			set_model (Model_o3)
+		ensure
+			model_set: model ~ Model_o3
 		end
 
 feature {NONE} -- Implementation
@@ -289,14 +340,52 @@ feature -- Constants: Models
 	Default_model: STRING_32 = "gpt-4o-mini"
 			-- Default model (fast and cheap)
 
+	-- GPT-4.1 family (latest non-reasoning)
+	Model_gpt41: STRING_32 = "gpt-4.1"
+			-- GPT-4.1 - smartest non-reasoning model
+
+	Model_gpt41_mini: STRING_32 = "gpt-4.1-mini"
+			-- GPT-4.1 mini - smaller, faster
+
+	Model_gpt41_nano: STRING_32 = "gpt-4.1-nano"
+			-- GPT-4.1 nano - fastest, most cost-efficient
+
+	-- GPT-4o family
+	Model_gpt4o: STRING_32 = "gpt-4o"
+			-- GPT-4o - multimodal flagship
+
 	Model_gpt4o_mini: STRING_32 = "gpt-4o-mini"
 			-- GPT-4o mini - fast and affordable
 
-	Model_gpt4o: STRING_32 = "gpt-4o"
-			-- GPT-4o - more capable
-
+	-- GPT-4 Turbo
 	Model_gpt4_turbo: STRING_32 = "gpt-4-turbo"
 			-- GPT-4 Turbo - previous generation
+
+	-- O-series reasoning models
+	Model_o3: STRING_32 = "o3"
+			-- o3 - powerful reasoning model
+
+	Model_o3_mini: STRING_32 = "o3-mini"
+			-- o3-mini - fast reasoning model
+
+	Model_o3_pro: STRING_32 = "o3-pro"
+			-- o3-pro - extended reasoning time
+
+	Model_o1: STRING_32 = "o1"
+			-- o1 - previous reasoning model
+
+	Model_o1_pro: STRING_32 = "o1-pro"
+			-- o1-pro - previous extended reasoning
+
+	-- GPT-5 family
+	Model_gpt5: STRING_32 = "gpt-5"
+			-- GPT-5 - flagship reasoning model
+
+	Model_gpt51: STRING_32 = "gpt-5.1"
+			-- GPT-5.1 - improved speed and coding
+
+	Model_gpt52: STRING_32 = "gpt-5.2"
+			-- GPT-5.2 - latest flagship
 
 feature {NONE} -- Constants: JSON Keys
 
