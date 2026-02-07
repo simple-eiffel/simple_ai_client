@@ -55,10 +55,7 @@ feature -- Access
 		end
 
 	verbosity_level: INTEGER
-			-- Current verbosity level
-		attribute
-			Result := Verbosity_concise
-		end
+			-- Current verbosity level (defaults to 0; verbosity_instruction treats 0 as concise)
 
 feature -- Model validation
 

@@ -228,7 +228,7 @@ feature {NONE} -- Implementation
 					Result := create {AI_EMBEDDING_RESPONSE}.make_error ("No embedding in response", provider_name)
 				end
 			else
-				Result := create {AI_EMBEDDING_RESPONSE}.make_error ("Failed to parse Ollama response: " + a_output, provider_name)
+				Result := create {AI_EMBEDDING_RESPONSE}.make_error ({STRING_32} "Failed to parse Ollama response: " + a_output, provider_name)
 			end
 		ensure
 			result_attached: Result /= Void

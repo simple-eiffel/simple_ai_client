@@ -209,7 +209,7 @@ feature {NONE} -- Implementation
 				l_response_obj := al_value.as_object
 				Result := parse_response (l_response_obj)
 			else
-				Result := create_error_response ("Failed to parse Grok response: " + l_output.head (100))
+				Result := create_error_response ({STRING_32} "Failed to parse Grok response: " + l_output.head (100))
 			end
 		end
 
