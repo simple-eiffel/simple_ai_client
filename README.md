@@ -16,7 +16,7 @@ Part of the [Simple Eiffel](https://github.com/simple-eiffel) ecosystem.
 
 ## Features
 
-- **Multi-provider support**: Ollama (local), Claude, OpenAI
+- **Multi-provider support**: Ollama (local), Claude API, **Claude Code CLI on a Claude subscription** (`CLAUDE_CODE_CLIENT`, no API key), OpenAI
 - **Vector embeddings**: Semantic similarity search with local computation
 - **SQLite storage**: Persistent embedding store for error resolution patterns
 
