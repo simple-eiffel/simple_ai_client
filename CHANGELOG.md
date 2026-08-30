@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `CLAUDE_CODE_CLIENT`: chat completions through the local `claude -p --output-format json` CLI on a Claude subscription (no API key); clears `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` for the child only; prompt by stdin; parses `is_error`, `result`, `session_id`, `total_cost_usd`, `usage`
+
+### Changed
+- `CLAUDE_CLIENT`: current models (`claude-opus-5`, `claude-sonnet-5`, `claude-haiku-4-5`, `claude-fable-5`) with per-model costing; refusal and truncation surfaced; `curl_command_preview` for tests
+
+### Security
+- `CLAUDE_CLIENT`: the API key is never on the command line (curl `--variable`/`--expand-header`; it was visible to every process before); the request body goes by temporary file
+
 ### Changed
 - Testing config updates, AutoTest fixes, .gitignore cleanup
 - Add SCOOP concurrency capability
