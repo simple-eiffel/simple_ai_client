@@ -65,6 +65,8 @@ feature {NONE} -- Test Runners
 			run_test (agent claude_code_tests.test_batch_script_includes_system_prompt, "test_batch_script_includes_system_prompt")
 			run_test (agent claude_code_tests.test_defaults, "test_cc_defaults")
 			run_test (agent claude_code_tests.test_set_working_directory, "test_set_working_directory")
+			run_test (agent claude_code_tests.test_sandbox_flags_off_by_default, "test_sandbox_flags_off_by_default")
+			run_test (agent claude_code_tests.test_sandbox_flags_reach_the_command, "test_sandbox_flags_reach_the_command")
 			run_test (agent claude_code_tests.test_live_round_trip, "test_live_round_trip")
 		end
 

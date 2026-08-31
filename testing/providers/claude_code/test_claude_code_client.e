@@ -101,6 +101,56 @@ feature -- Test routines: configuration
 			assert_true ("dir_set", l_c.working_directory.same_string ({STRING_32} "D:\prod"))
 		end
 
+feature -- Test routines: sandbox flags
+
+	test_sandbox_flags_off_by_default
+			-- A fresh client adds no sandbox flag: existing callers see the
+			-- exact command they always saw.
+		note
+			testing: "covers/{CLAUDE_CODE_CLIENT}.extra_arguments"
+		local
+			l_c: CLAUDE_CODE_CLIENT
+			l_script: STRING_32
+		do
+			create l_c.make
+			assert_true ("no_flags", l_c.extra_arguments.is_empty)
+			assert_false ("tools_on", l_c.tools_disabled)
+			assert_true ("sources_default", l_c.setting_sources = Void)
+			assert_false ("mcp_default", l_c.strict_mcp_config)
+			l_script := l_c.batch_script_preview ({STRING_32} "C:\temp\p.txt", Void)
+			assert_false ("no_tools_flag", l_script.has_substring ({STRING_32} "--tools"))
+			assert_false ("no_sources_flag", l_script.has_substring ({STRING_32} "--setting-sources"))
+			assert_false ("no_strict_flag", l_script.has_substring ({STRING_32} "--strict-mcp-config"))
+		end
+
+	test_sandbox_flags_reach_the_command
+			-- Each setter's flag appears, spelled as the installed CLI takes it,
+			-- and the whole `extra_arguments' block is embedded verbatim.
+		note
+			testing: "covers/{CLAUDE_CODE_CLIENT}.set_tools_disabled"
+		local
+			l_c: CLAUDE_CODE_CLIENT
+			l_script: STRING_32
+		do
+			create l_c.make
+			l_c.set_tools_disabled
+			l_c.set_setting_sources ("")
+			l_c.set_strict_mcp_config
+			assert_true ("tools_off", l_c.extra_arguments.has_substring ("--tools %"%""))
+			assert_true ("sources_empty", l_c.extra_arguments.has_substring ("--setting-sources %"%""))
+			assert_true ("strict", l_c.extra_arguments.has_substring ("--strict-mcp-config"))
+			l_script := l_c.batch_script_preview ({STRING_32} "C:\temp\p.txt", Void)
+			assert_true ("flags_verbatim", l_script.has_substring (l_c.extra_arguments))
+			assert_true ("still_headless", l_script.has_substring ({STRING_32} "claude -p"))
+			assert_true ("still_clears_key", l_script.has_substring ({STRING_32} "set ANTHROPIC_API_KEY=%R%N"))
+			l_c.set_setting_sources ("user,project")
+			assert_true ("named_sources", l_c.extra_arguments.has_substring ("--setting-sources %"user,project%""))
+			assert_true ("valid_empty", l_c.is_valid_setting_sources (""))
+			assert_true ("valid_list", l_c.is_valid_setting_sources ("user,project,local"))
+			assert_false ("invalid_quote", l_c.is_valid_setting_sources ("user%""))
+			assert_false ("invalid_space", l_c.is_valid_setting_sources ("user project"))
+		end
+
 feature -- Test routines: live
 
 	test_live_round_trip

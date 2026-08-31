@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `CLAUDE_CODE_CLIENT` sandbox flags (0.2.0): `set_tools_disabled` (`--tools ""` - every built-in tool off), `set_setting_sources` (`--setting-sources <sources>`; the empty string loads no user, project or local settings file), `set_strict_mcp_config` (`--strict-mcp-config` - only MCP servers from `--mcp-config`), and the pure query `extra_arguments` so contracts and tests can verify exactly what will run; `build_batch_script` embeds the flags verbatim and promises so in its postconditions. Flag spellings verified against the installed CLI. Existing callers are unchanged: with no setter called, the command is exactly what it was.
 - `CLAUDE_CODE_CLIENT`: chat completions through the local `claude -p --output-format json` CLI on a Claude subscription (no API key); clears `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` for the child only; prompt by stdin; parses `is_error`, `result`, `session_id`, `total_cost_usd`, `usage`
 
 ### Changed
