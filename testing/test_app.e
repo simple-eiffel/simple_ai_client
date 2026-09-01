@@ -67,6 +67,8 @@ feature {NONE} -- Test Runners
 			run_test (agent claude_code_tests.test_set_working_directory, "test_set_working_directory")
 			run_test (agent claude_code_tests.test_sandbox_flags_off_by_default, "test_sandbox_flags_off_by_default")
 			run_test (agent claude_code_tests.test_sandbox_flags_reach_the_command, "test_sandbox_flags_reach_the_command")
+			run_test (agent claude_code_tests.test_resume_session_reaches_the_command, "test_resume_session_reaches_the_command")
+			run_test (agent claude_code_tests.test_session_id_shape_is_a_uuid, "test_session_id_shape_is_a_uuid")
 			run_test (agent claude_code_tests.test_live_round_trip, "test_live_round_trip")
 		end
 

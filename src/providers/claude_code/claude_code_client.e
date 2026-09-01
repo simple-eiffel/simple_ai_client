@@ -146,6 +146,13 @@ feature -- Access
 			-- Will the CLI run with `--strict-mcp-config', loading only MCP
 			-- servers given by --mcp-config (with none given: none)?
 
+	resume_session_id: detachable STRING_8
+			-- The session the next call will continue with `--resume', or
+			-- Void for a fresh conversation. Set it from a previous call's
+			-- `last_session_id'; only a UUID shape is accepted
+			-- (`is_valid_session_id'), so nothing else can ride into the
+			-- generated batch line.
+
 feature -- Status report
 
 	is_available: BOOLEAN
@@ -247,7 +254,55 @@ feature -- Element change
 			directory_unchanged: working_directory = old working_directory
 		end
 
+	set_resume_session (a_session_id: READABLE_STRING_GENERAL)
+			-- Continue the conversation `a_session_id' on the next call:
+			-- the CLI takes `--resume <session id>' (verified against the
+			-- installed CLI's --help). Only a UUID is accepted, so the
+			-- embedded value can never carry cmd metacharacters.
+		require
+			session_shaped: is_valid_session_id (a_session_id)
+		do
+			resume_session_id := a_session_id.to_string_8
+		ensure
+			recorded: attached resume_session_id as al_id and then al_id.same_string_general (a_session_id)
+			model_unchanged: model = old model
+			directory_unchanged: working_directory = old working_directory
+		end
+
+	clear_resume_session
+			-- The next call starts a fresh conversation.
+		do
+			resume_session_id := Void
+		ensure
+			cleared: resume_session_id = Void
+			model_unchanged: model = old model
+			directory_unchanged: working_directory = old working_directory
+		end
+
 feature -- Validation
+
+	is_valid_session_id (a_id: READABLE_STRING_GENERAL): BOOLEAN
+			-- Is `a_id' a UUID: 8-4-4-4-12 hexadecimal digits joined by
+			-- hyphens (the shape `--session-id' documents and
+			-- `last_session_id' returns)? Nothing else may reach `--resume'.
+		local
+			i: INTEGER
+			c: NATURAL_32
+		do
+			Result := a_id.count = 36
+			from i := 1 until i > a_id.count or not Result loop
+				c := a_id.code (i)
+				if i = 9 or i = 14 or i = 19 or i = 24 then
+					Result := c = 45
+				else
+					Result := (c >= 48 and c <= 57) or (c >= 97 and c <= 102) or (c >= 65 and c <= 70)
+				end
+				i := i + 1
+			end
+		ensure
+			bounded: Result implies a_id.count = 36
+			ascii: Result implies a_id.is_valid_as_string_8
+		end
 
 	is_valid_setting_sources (a_sources: READABLE_STRING_8): BOOLEAN
 			-- Is `a_sources' a value `--setting-sources' takes: empty, or
@@ -407,6 +462,13 @@ feature {NONE} -- Implementation
 			Result.append (" --model %"")
 			Result.append (model)
 			Result.append ("%"")
+			if attached resume_session_id as al_resume then
+				Result.append (" ")
+				Result.append (Resume_flag)
+				Result.append (" %"")
+				Result.append_string_general (al_resume)
+				Result.append ("%"")
+			end
 			Result.append_string_general (extra_arguments)
 			if attached a_system_path as al_system then
 				Result.append (" --append-system-prompt-file %"")
@@ -419,6 +481,8 @@ feature {NONE} -- Implementation
 		ensure
 			clears_api_key: Result.has_substring ({STRING_32} "set ANTHROPIC_API_KEY=")
 			reads_prompt_from_stdin: Result.has_substring ({STRING_32} "< %"")
+			resumed_when_set: attached resume_session_id implies Result.has_substring (Resume_flag)
+			fresh_when_unset: resume_session_id = Void implies not Result.has_substring (Resume_flag)
 			tools_off: tools_disabled implies Result.has_substring (Tools_off_flag)
 			sources_pinned: attached setting_sources implies Result.has_substring (Setting_sources_flag)
 			mcp_strict: strict_mcp_config implies Result.has_substring (Strict_mcp_flag)
@@ -544,6 +608,9 @@ feature -- Constants
 	Strict_mcp_flag: STRING_8 = "--strict-mcp-config"
 			-- Only MCP servers from --mcp-config load.
 
+	Resume_flag: STRING_8 = "--resume"
+			-- Continues a conversation by session id.
+
 feature {NONE} -- Constants: environment and JSON keys
 
 	Env_temp: STRING_32 = "TEMP"
@@ -564,6 +631,7 @@ invariant
 	process_helper_attached: process_helper /= Void
 	json_attached: json /= Void
 	sources_shaped: attached setting_sources as s implies is_valid_setting_sources (s)
+	resume_shaped: attached resume_session_id as r implies is_valid_session_id (r)
 
 note
 	copyright: "Copyright (c) 2026, Larry Rix"
