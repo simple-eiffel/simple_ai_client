@@ -178,19 +178,27 @@ feature {NONE} -- Implementation
 			l_curl_cmd.append (l_temp_path)
 			
 			l_output := process_helper.shell_output (l_curl_cmd, Void)
-			
+
 			-- Clean up temp file
 			create l_temp_file.make_with_name (l_temp_path.to_string_8)
 			if l_temp_file.exists then
 				l_temp_file.delete
 			end
-			
-			l_response_value := json.parse_response (l_output)
-			if attached l_response_value as al_value and then al_value.is_object then
-				l_response_obj := al_value.as_object
-				Result := parse_chat_response (l_response_obj)
+
+			if l_output.is_empty then
+				-- A dead or unreachable server gives curl nothing to print.
+				-- Answer an error rather than handing empty text to the JSON
+				-- parser, whose precondition refuses it (found by simple_chat's
+				-- dead-endpoint test).
+				Result := create_error_response ({STRING_32} "No response from Ollama at " + base_url + {STRING_32} " (server down or unreachable).")
 			else
-				Result := create_error_response ({STRING_32} "Failed to parse Ollama response: " + l_output.head (100))
+				l_response_value := json.parse_response (l_output)
+				if attached l_response_value as al_value and then al_value.is_object then
+					l_response_obj := al_value.as_object
+					Result := parse_chat_response (l_response_obj)
+				else
+					Result := create_error_response ({STRING_32} "Failed to parse Ollama response: " + l_output.head (100))
+				end
 			end
 		end
 
