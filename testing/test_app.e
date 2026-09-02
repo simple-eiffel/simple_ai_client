@@ -19,8 +19,12 @@ feature {NONE} -- Initialization
 
 			run_lib_tests
 			run_embedding_tests
-			-- Note: Ollama and Claude tests require network access
-			-- They are not included in the automated runner
+			run_claude_offline_tests
+			run_claude_code_tests
+			-- Note: the Ollama and Claude tests in TEST_OLLAMA_CLIENT and
+			-- TEST_CLAUDE_CLIENT need network access and a paid API call, so
+			-- they stay out of the automated runner. TEST_CLAUDE_CLIENT_OFFLINE
+			-- needs neither and does run here.
 
 			print ("%N========================%N")
 			print ("Results: " + passed.out + " passed, " + failed.out + " failed%N")
@@ -41,6 +45,27 @@ feature {NONE} -- Test Runners
 			run_test (agent lib_tests.test_message_make_system, "test_message_make_system")
 			run_test (agent lib_tests.test_response_make, "test_response_make")
 			run_test (agent lib_tests.test_response_error, "test_response_error")
+		end
+
+	run_claude_offline_tests
+		do
+			create claude_offline_tests
+			run_test (agent claude_offline_tests.test_curl_command_omits_api_key, "test_curl_command_omits_api_key")
+			run_test (agent claude_offline_tests.test_model_family_classification, "test_model_family_classification")
+			run_test (agent claude_offline_tests.test_pricing_lookup, "test_pricing_lookup")
+			run_test (agent claude_offline_tests.test_defaults, "test_defaults")
+			run_test (agent claude_offline_tests.test_set_max_tokens, "test_set_max_tokens")
+		end
+
+	run_claude_code_tests
+		do
+			create claude_code_tests
+			run_test (agent claude_code_tests.test_batch_script_clears_api_key, "test_batch_script_clears_api_key")
+			run_test (agent claude_code_tests.test_batch_script_reads_prompt_from_stdin, "test_batch_script_reads_prompt_from_stdin")
+			run_test (agent claude_code_tests.test_batch_script_includes_system_prompt, "test_batch_script_includes_system_prompt")
+			run_test (agent claude_code_tests.test_defaults, "test_cc_defaults")
+			run_test (agent claude_code_tests.test_set_working_directory, "test_set_working_directory")
+			run_test (agent claude_code_tests.test_live_round_trip, "test_live_round_trip")
 		end
 
 	run_embedding_tests
@@ -75,6 +100,8 @@ feature {NONE} -- Implementation
 
 	lib_tests: LIB_TESTS
 	embedding_tests: TEST_AI_EMBEDDING
+	claude_offline_tests: TEST_CLAUDE_CLIENT_OFFLINE
+	claude_code_tests: TEST_CLAUDE_CODE_CLIENT
 
 	passed: INTEGER
 	failed: INTEGER

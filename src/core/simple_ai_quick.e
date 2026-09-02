@@ -86,7 +86,7 @@ feature -- Provider Configuration
 			logger.info ("Configuring Claude provider")
 			create {CLAUDE_CLIENT} client.make_with_api_key (a_api_key)
 			provider := "claude"
-			current_model := "claude-sonnet-4-20250514"
+			current_model := "claude-opus-5"
 		ensure
 			is_configured: is_configured
 			provider_claude: provider ~ "claude"
@@ -158,15 +158,22 @@ feature -- Basic Queries
 			is_configured: is_configured
 			role_not_empty: not a_role.is_empty
 			question_not_empty: not a_question.is_empty
+		local
+			l_resp: AI_RESPONSE
 		do
 			logger.debug_log ("Asking as '" + a_role.head (30) + "': " + a_question.head (50) + "...")
 			last_error := ""
 			if attached client as c then
-				if attached c.ask_with_system (a_role.to_string_32, a_question.to_string_32) as resp then
-					Result := resp.text.to_string_8
-				else
+				l_resp := c.ask_with_system (a_role.to_string_32, a_question.to_string_32)
+				if l_resp.is_error and then attached l_resp.error_message as al_err then
 					Result := ""
-					last_error := "No response from AI"
+					last_error := al_err.to_string_8
+					logger.error (last_error)
+				elseif l_resp.text.is_empty then
+					Result := ""
+					last_error := "Empty response from AI"
+				else
+					Result := l_resp.text.to_string_8
 				end
 			else
 				Result := ""

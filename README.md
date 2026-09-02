@@ -16,7 +16,7 @@ Part of the [Simple Eiffel](https://github.com/simple-eiffel) ecosystem.
 
 ## Features
 
-- **Multi-provider support**: Ollama (local), Claude, OpenAI
+- **Multi-provider support**: Ollama (local), Claude API, **Claude Code CLI on a Claude subscription** (`CLAUDE_CODE_CLIENT`, no API key), OpenAI
 - **Vector embeddings**: Semantic similarity search with local computation
 - **SQLite storage**: Persistent embedding store for error resolution patterns
 
@@ -151,6 +151,20 @@ do
 end
 ```
 
+### Claude Code CLI (subscription, no API key)
+
+`CLAUDE_CODE_CLIENT` runs the locally installed `claude` CLI headless (`claude -p --output-format json`) so a Claude Pro/Max subscription pays for the call instead of a metered key. Three things it does that matter:
+
+- It clears `ANTHROPIC_API_KEY` and `ANTHROPIC_AUTH_TOKEN` **for the child process only** - a stale key in your environment would otherwise silently shadow the subscription login and the call would fail for lack of credit.
+- The prompt travels on **stdin**, never on the command line (no 32 KB limit, no shell quoting, nothing readable through the process table); an optional system prompt goes by `--append-system-prompt-file`.
+- It parses the CLI's JSON (`is_error`, `result`, `session_id`, `total_cost_usd`, `usage`) into the same `AI_RESPONSE` the other providers return.
+
+`timeout_seconds` is advisory until `simple_process` gains wait-with-timeout and kill. Usage: `testing/providers/claude_code/test_claude_code_client.e`.
+
+### Claude API client hardening
+
+`CLAUDE_CLIENT` never places the API key on the command line (curl `--variable %%ENV` + `--expand-header`), sends the body by temporary file, knows the current models (`claude-opus-5`, `claude-sonnet-5`, `claude-haiku-4-5`, `claude-fable-5`) with per-model costing, and surfaces refusals and truncation. `curl_command_preview` lets a test prove the key is absent from the command.
+
 ## Classes
 
 | Class | Purpose |
@@ -161,7 +175,8 @@ end
 | `AI_EMBEDDING_STORE` | SQLite-backed semantic search storage |
 | `OLLAMA_CLIENT` | Chat completions via Ollama |
 | `OLLAMA_EMBEDDING_CLIENT` | Embeddings via Ollama `/api/embeddings` |
-| `CLAUDE_CLIENT` | Chat completions via Anthropic Claude |
+| `CLAUDE_CLIENT` | Chat completions via the Anthropic API (metered key) |
+| `CLAUDE_CODE_CLIENT` | Chat completions through the local `claude -p` CLI, billed to the Claude.ai subscription - no API key |
 | `AI_RESPONSE` | Response wrapper for chat operations |
 
 ## Embedding Models

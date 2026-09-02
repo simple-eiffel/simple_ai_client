@@ -39,7 +39,7 @@ deferred class
 feature -- Access
 
 	model: STRING_32
-			-- Current model name (e.g., "llama3", "claude-sonnet-4.5")
+			-- Current model name (e.g., "llama3", "claude-opus-5")
 		deferred
 		ensure
 			result_attached: Result /= Void
