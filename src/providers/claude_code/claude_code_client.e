@@ -44,6 +44,23 @@ note
 		a caller's project configuration out of a library call. `--bare' would
 		suppress all of it but also forces API-key authentication, which would
 		defeat the purpose of this class.
+
+		SANDBOX FLAGS
+
+		A caller that hands chat text to the CLI can pin the child down
+		(verified against the installed CLI's --help):
+		- `set_tools_disabled' adds `--tools ""' - an empty list disables
+		  every built-in tool, so the model can only answer, never act;
+		- `set_setting_sources' adds `--setting-sources <sources>' - the
+		  comma-separated subset of user, project, local to load; the empty
+		  string loads none of them, keeping the user's permissions and
+		  hooks out of the child (managed policy settings still apply);
+		- `set_strict_mcp_config' adds `--strict-mcp-config' - only MCP
+		  servers named by --mcp-config load, so with none given, none load.
+		The flags travel in `extra_arguments', which `build_batch_script'
+		embeds verbatim; `batch_script_preview' shows the result. Note that
+		CLAUDE.md files of the working directory's ANCESTORS still load
+		regardless of these flags - directory placement is the caller's job.
 	]"
 	author: "Larry Rix"
 	EIS: "name=Claude Code headless mode", "src=https://code.claude.com/docs/en/headless", "tag=cli"
@@ -118,6 +135,24 @@ feature -- Access
 	last_raw_output: detachable STRING_32
 			-- Unparsed CLI output of the most recent call, for diagnosis.
 
+	tools_disabled: BOOLEAN
+			-- Will the CLI run with `--tools ""', disabling every built-in tool?
+
+	setting_sources: detachable STRING_8
+			-- The value `--setting-sources' will carry, or Void for the CLI's
+			-- default. "" loads no user, project or local settings file.
+
+	strict_mcp_config: BOOLEAN
+			-- Will the CLI run with `--strict-mcp-config', loading only MCP
+			-- servers given by --mcp-config (with none given: none)?
+
+	resume_session_id: detachable STRING_8
+			-- The session the next call will continue with `--resume', or
+			-- Void for a fresh conversation. Set it from a previous call's
+			-- `last_session_id'; only a UUID shape is accepted
+			-- (`is_valid_session_id'), so nothing else can ride into the
+			-- generated batch line.
+
 feature -- Status report
 
 	is_available: BOOLEAN
@@ -182,7 +217,139 @@ feature -- Element change
 			timeout_set: timeout_seconds = a_seconds
 		end
 
+	set_tools_disabled
+			-- Run the CLI with `--tools ""': no built-in tool at all.
+		do
+			tools_disabled := True
+		ensure
+			disabled: tools_disabled
+			in_arguments: extra_arguments.has_substring (Tools_off_flag)
+			model_unchanged: model = old model
+			directory_unchanged: working_directory = old working_directory
+		end
+
+	set_setting_sources (a_sources: READABLE_STRING_8)
+			-- Run the CLI with `--setting-sources a_sources' - the comma-separated
+			-- subset of user, project, local to load; "" loads none of them.
+		require
+			sources_shaped: is_valid_setting_sources (a_sources)
+		do
+			setting_sources := a_sources.to_string_8
+		ensure
+			recorded: attached setting_sources as s and then s.same_string (a_sources)
+			in_arguments: extra_arguments.has_substring (Setting_sources_flag)
+			model_unchanged: model = old model
+			directory_unchanged: working_directory = old working_directory
+		end
+
+	set_strict_mcp_config
+			-- Run the CLI with `--strict-mcp-config': only MCP servers from
+			-- --mcp-config load; with none given, none load.
+		do
+			strict_mcp_config := True
+		ensure
+			strict: strict_mcp_config
+			in_arguments: extra_arguments.has_substring (Strict_mcp_flag)
+			model_unchanged: model = old model
+			directory_unchanged: working_directory = old working_directory
+		end
+
+	set_resume_session (a_session_id: READABLE_STRING_GENERAL)
+			-- Continue the conversation `a_session_id' on the next call:
+			-- the CLI takes `--resume <session id>' (verified against the
+			-- installed CLI's --help). Only a UUID is accepted, so the
+			-- embedded value can never carry cmd metacharacters.
+		require
+			session_shaped: is_valid_session_id (a_session_id)
+		do
+			resume_session_id := a_session_id.to_string_8
+		ensure
+			recorded: attached resume_session_id as al_id and then al_id.same_string_general (a_session_id)
+			model_unchanged: model = old model
+			directory_unchanged: working_directory = old working_directory
+		end
+
+	clear_resume_session
+			-- The next call starts a fresh conversation.
+		do
+			resume_session_id := Void
+		ensure
+			cleared: resume_session_id = Void
+			model_unchanged: model = old model
+			directory_unchanged: working_directory = old working_directory
+		end
+
+feature -- Validation
+
+	is_valid_session_id (a_id: READABLE_STRING_GENERAL): BOOLEAN
+			-- Is `a_id' a UUID: 8-4-4-4-12 hexadecimal digits joined by
+			-- hyphens (the shape `--session-id' documents and
+			-- `last_session_id' returns)? Nothing else may reach `--resume'.
+		local
+			i: INTEGER
+			c: NATURAL_32
+		do
+			Result := a_id.count = 36
+			from i := 1 until i > a_id.count or not Result loop
+				c := a_id.code (i)
+				if i = 9 or i = 14 or i = 19 or i = 24 then
+					Result := c = 45
+				else
+					Result := (c >= 48 and c <= 57) or (c >= 97 and c <= 102) or (c >= 65 and c <= 70)
+				end
+				i := i + 1
+			end
+		ensure
+			bounded: Result implies a_id.count = 36
+			ascii: Result implies a_id.is_valid_as_string_8
+		end
+
+	is_valid_setting_sources (a_sources: READABLE_STRING_8): BOOLEAN
+			-- Is `a_sources' a value `--setting-sources' takes: empty, or
+			-- lowercase source names joined by commas ([a-z,] only)?
+		local
+			i: INTEGER
+		do
+			Result := True
+			from i := 1 until i > a_sources.count or not Result loop
+				Result := (a_sources.code (i) >= 97 and a_sources.code (i) <= 122) or a_sources.code (i) = 44
+				i := i + 1
+			end
+		ensure
+			empty_is_valid: a_sources.is_empty implies Result
+		end
+
 feature -- Diagnostics
+
+	extra_arguments: STRING_8
+			-- The sandbox flags exactly as they will appear on the command line,
+			-- in order: `--tools ""', `--setting-sources "<value>"',
+			-- `--strict-mcp-config'; empty when none is set. Pure: derived from
+			-- `tools_disabled', `setting_sources' and `strict_mcp_config', so
+			-- contracts can verify what will run.
+		do
+			create Result.make (48)
+			if tools_disabled then
+				Result.append (" ")
+				Result.append (Tools_off_flag)
+			end
+			if attached setting_sources as al_sources then
+				Result.append (" ")
+				Result.append (Setting_sources_flag)
+				Result.append (" %"")
+				Result.append (al_sources)
+				Result.append ("%"")
+			end
+			if strict_mcp_config then
+				Result.append (" ")
+				Result.append (Strict_mcp_flag)
+			end
+		ensure
+			tools_flag: tools_disabled = Result.has_substring (Tools_off_flag)
+			sources_flag: (setting_sources /= Void) = Result.has_substring (Setting_sources_flag)
+			strict_flag: strict_mcp_config = Result.has_substring (Strict_mcp_flag)
+			empty_when_unset: (not tools_disabled and setting_sources = Void and not strict_mcp_config) = Result.is_empty
+		end
 
 	batch_script_preview (a_prompt_path: STRING_32; a_system_path: detachable STRING_32): STRING_32
 			-- The batch file this client would run for the given input files.
@@ -295,6 +462,14 @@ feature {NONE} -- Implementation
 			Result.append (" --model %"")
 			Result.append (model)
 			Result.append ("%"")
+			if attached resume_session_id as al_resume then
+				Result.append (" ")
+				Result.append (Resume_flag)
+				Result.append (" %"")
+				Result.append_string_general (al_resume)
+				Result.append ("%"")
+			end
+			Result.append_string_general (extra_arguments)
 			if attached a_system_path as al_system then
 				Result.append (" --append-system-prompt-file %"")
 				Result.append (al_system)
@@ -306,6 +481,12 @@ feature {NONE} -- Implementation
 		ensure
 			clears_api_key: Result.has_substring ({STRING_32} "set ANTHROPIC_API_KEY=")
 			reads_prompt_from_stdin: Result.has_substring ({STRING_32} "< %"")
+			resumed_when_set: attached resume_session_id implies Result.has_substring (Resume_flag)
+			fresh_when_unset: resume_session_id = Void implies not Result.has_substring (Resume_flag)
+			tools_off: tools_disabled implies Result.has_substring (Tools_off_flag)
+			sources_pinned: attached setting_sources implies Result.has_substring (Setting_sources_flag)
+			mcp_strict: strict_mcp_config implies Result.has_substring (Strict_mcp_flag)
+			flags_verbatim: extra_arguments.is_empty or else Result.has_substring (extra_arguments)
 		end
 
 	parse_cli_response (a_obj: SIMPLE_JSON_OBJECT): AI_RESPONSE
@@ -418,6 +599,18 @@ feature -- Constants
 	Default_timeout_seconds: INTEGER = 300
 			-- Advisory ceiling reported in errors
 
+	Tools_off_flag: STRING_8 = "--tools %"%""
+			-- Disables every built-in tool (an empty tool list).
+
+	Setting_sources_flag: STRING_8 = "--setting-sources"
+			-- Chooses which of user, project, local settings files load.
+
+	Strict_mcp_flag: STRING_8 = "--strict-mcp-config"
+			-- Only MCP servers from --mcp-config load.
+
+	Resume_flag: STRING_8 = "--resume"
+			-- Continues a conversation by session id.
+
 feature {NONE} -- Constants: environment and JSON keys
 
 	Env_temp: STRING_32 = "TEMP"
@@ -437,6 +630,8 @@ invariant
 	timeout_positive: timeout_seconds > 0
 	process_helper_attached: process_helper /= Void
 	json_attached: json /= Void
+	sources_shaped: attached setting_sources as s implies is_valid_setting_sources (s)
+	resume_shaped: attached resume_session_id as r implies is_valid_session_id (r)
 
 note
 	copyright: "Copyright (c) 2026, Larry Rix"

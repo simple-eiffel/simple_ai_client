@@ -158,6 +158,9 @@ end
 - It clears `ANTHROPIC_API_KEY` and `ANTHROPIC_AUTH_TOKEN` **for the child process only** - a stale key in your environment would otherwise silently shadow the subscription login and the call would fail for lack of credit.
 - The prompt travels on **stdin**, never on the command line (no 32 KB limit, no shell quoting, nothing readable through the process table); an optional system prompt goes by `--append-system-prompt-file`.
 - It parses the CLI's JSON (`is_error`, `result`, `session_id`, `total_cost_usd`, `usage`) into the same `AI_RESPONSE` the other providers return.
+- Sandbox flags for callers that hand untrusted text to the CLI: `set_tools_disabled` adds `--tools ""` (every built-in tool off), `set_setting_sources ("")` adds `--setting-sources ""` (no user, project or local settings file loads; managed policy settings still apply), `set_strict_mcp_config` adds `--strict-mcp-config` (only MCP servers from `--mcp-config`, so with none given, none). The pure query `extra_arguments` shows the flags exactly as they will run, and `batch_script_preview` shows the whole command. Note: CLAUDE.md files in the working directory's *ancestors* still load - placing the working directory is the caller's job.
+
+- Sessions: `set_resume_session (a_session_id)` adds `--resume "<uuid>"` so the next call continues an earlier conversation (feed it a previous call's `last_session_id`); `clear_resume_session` returns to a fresh one. Only a UUID shape passes `is_valid_session_id`, so nothing else can ride into the generated batch line.
 
 `timeout_seconds` is advisory until `simple_process` gains wait-with-timeout and kill. Usage: `testing/providers/claude_code/test_claude_code_client.e`.
 
