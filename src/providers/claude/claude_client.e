@@ -575,6 +575,10 @@ feature {NONE} -- Implementation
 				if attached write_request_body (l_request.to_json_string) as al_body_path then
 					l_curl_cmd := build_curl_command (al_body_path)
 					l_output := process_helper.shell_output (l_curl_cmd, Void)
+						-- curl's stdout arrives byte-widened, not UTF-8
+						-- decoded; undo that before it reaches the JSON
+						-- parser or an error message.
+					l_output := decode_process_bytes (l_output)
 					delete_request_body (al_body_path)
 
 					-- Parse curl output as JSON and convert to AI_RESPONSE

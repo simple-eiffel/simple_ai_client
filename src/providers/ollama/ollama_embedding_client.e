@@ -95,17 +95,39 @@ feature -- Embedding operations
 			text_not_empty: not a_text.is_empty
 		local
 			l_request: SIMPLE_JSON_OBJECT
+			l_json_body: STRING_32
 			l_curl_cmd: STRING_32
 			l_output: STRING_32
+			l_temp_file: RAW_FILE
+			l_temp_path: STRING_32
 		do
 			-- Build request JSON
 			create l_request.make
 			l_request.put_string (model, Key_model).do_nothing
 			l_request.put_string (a_text, Key_prompt).do_nothing
+			l_json_body := l_request.to_json_string
 
-			-- Execute curl command
-			l_curl_cmd := build_curl_command (Endpoint_embeddings, l_request.to_json_string)
+				-- The body travels by file, not embedded on the command
+				-- line: `escape_for_windows' only escaped quotes, and
+				-- everything SIMPLE_PROCESS executes is narrowed to
+				-- STRING_8 before it ever reaches the child, which fails
+				-- outright on non-ASCII text (Hebrew, Greek, emoji) placed
+				-- directly on the command line.
+			l_temp_path := {STRING_32} "ollama_embed_request.json"
+			create l_temp_file.make_create_read_write (l_temp_path.to_string_8)
+			l_temp_file.put_string ({UTF_CONVERTER}.string_32_to_utf_8_string_8 (l_json_body))
+			l_temp_file.close
+
+			l_curl_cmd := build_curl_command (Endpoint_embeddings, l_temp_path)
 			l_output := process_helper.shell_output (l_curl_cmd, Void)
+				-- curl's stdout arrives byte-widened, not UTF-8 decoded;
+				-- undo that before it reaches the JSON parser.
+			l_output := decode_process_bytes (l_output)
+
+			create l_temp_file.make_with_name (l_temp_path.to_string_8)
+			if l_temp_file.exists then
+				l_temp_file.delete
+			end
 
 			-- Parse response
 			Result := parse_embedding_response (l_output, a_text)
@@ -148,11 +170,14 @@ feature -- Status
 
 feature {NONE} -- Implementation
 
-	build_curl_command (a_endpoint: STRING_32; a_json_body: STRING_32): STRING_32
-			-- Build curl command for API request
+	build_curl_command (a_endpoint: STRING_32; a_body_path: STRING_32): STRING_32
+			-- Build curl command for API request, reading its JSON body from
+			-- `a_body_path' (`-d @path') rather than embedding it on the
+			-- command line, so non-ASCII text in the prompt never has to
+			-- survive Windows command-line escaping.
 		require
 			endpoint_attached: a_endpoint /= Void
-			body_attached: a_json_body /= Void
+			body_path_not_empty: not a_body_path.is_empty
 		local
 			l_url: STRING_32
 		do
@@ -160,23 +185,29 @@ feature {NONE} -- Implementation
 			create Result.make (500)
 			Result.append ("curl.exe -s -X POST ")
 			Result.append (l_url)
-			Result.append (" -H %"Content-Type: application/json%" -d %"")
-			Result.append (escape_for_windows (a_json_body))
-			Result.append ("%"")
+			Result.append (" -H %"Content-Type: application/json%" -d @")
+			Result.append (a_body_path)
 		ensure
 			result_attached: Result /= Void
 			result_not_empty: not Result.is_empty
 		end
 
-	escape_for_windows (a_json: STRING_32): STRING_32
-			-- Escape JSON for Windows command line
-		require
-			json_attached: a_json /= Void
+	decode_process_bytes (a_raw: STRING_32): STRING_32
+			-- `a_raw' re-decoded as UTF-8, undoing the byte-widening
+			-- `SIMPLE_PROCESS' applies to a child process's stdout. See
+			-- {AI_CLIENT}.decode_process_bytes, which every other provider
+			-- in this library shares through inheritance; this class does
+			-- not inherit {AI_CLIENT} (its shape is embeddings, not chat),
+			-- so the same small fix is kept here instead.
 		do
-			create Result.make_from_string (a_json)
-			Result.replace_substring_all ({STRING_32} "%"", {STRING_32} "\%"")
+			if a_raw.is_valid_as_string_8 then
+				Result := {UTF_CONVERTER}.utf_8_string_8_to_string_32 (a_raw.to_string_8)
+			else
+				Result := a_raw
+			end
 		ensure
 			result_attached: Result /= Void
+			identity_when_not_narrowable: not a_raw.is_valid_as_string_8 implies Result = a_raw
 		end
 
 	parse_embedding_response (a_output: STRING_32; a_source_text: STRING_32): AI_EMBEDDING_RESPONSE

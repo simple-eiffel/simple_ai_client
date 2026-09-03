@@ -168,6 +168,47 @@ feature -- Element change
 			verbose_set: verbosity_level = Verbosity_verbose
 		end
 
+feature -- Diagnostics
+
+	decode_process_bytes (a_raw: STRING_32): STRING_32
+			-- `a_raw' re-decoded as UTF-8, undoing the byte-widening every
+			-- provider inherits from `SIMPLE_PROCESS'.
+			--
+			-- `SIMPLE_PROCESS.last_output' - what `SIMPLE_PROCESS_HELPER.
+			-- shell_output' returns, and what every provider's
+			-- `execute_chat' receives back from curl or the claude CLI -
+			-- widens each byte of the child's stdout into one STRING_32
+			-- character 0-255 rather than decoding it (see
+			-- `SIMPLE_PROCESS.utf8_to_string_32', despite its name). A
+			-- UTF-8 em-dash (bytes E2 80 94) therefore arrives as three
+			-- separate Latin-1-looking characters, not the one character
+			-- U+2014 the child actually wrote. Because every character
+			-- such output can hold is consequently in the 0-255 range,
+			-- narrowing it back to STRING_8 recovers the exact original
+			-- bytes losslessly, and decoding those as UTF-8 recovers the
+			-- text.
+			--
+			-- Public - like `batch_script_preview' and
+			-- `curl_command_preview' elsewhere in this library - so the
+			-- byte boundary can be tested directly with hand-built byte
+			-- vectors, without a live network call or CLI invocation.
+			--
+			-- If `a_raw' is not narrowable to STRING_8 (a caller already
+			-- handed this real Unicode text rather than widened bytes) it
+			-- is returned unchanged rather than raising a precondition
+			-- violation, so this stays safe to call even if a future
+			-- `SIMPLE_PROCESS' decodes correctly on its own.
+		do
+			if a_raw.is_valid_as_string_8 then
+				Result := {UTF_CONVERTER}.utf_8_string_8_to_string_32 (a_raw.to_string_8)
+			else
+				Result := a_raw
+			end
+		ensure
+			result_attached: Result /= Void
+			identity_when_not_narrowable: not a_raw.is_valid_as_string_8 implies Result = a_raw
+		end
+
 feature {NONE} -- Implementation
 
 	verbosity_instruction: STRING_32

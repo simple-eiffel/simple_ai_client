@@ -219,7 +219,9 @@ feature {NONE} -- Implementation
 				-- Write JSON to temp file to avoid escaping issues
 				l_temp_path := {STRING_32} "openai_request.json"
 				create l_temp_file.make_create_read_write (l_temp_path.to_string_8)
-				l_temp_file.put_string (l_json_body.to_string_8)
+					-- Encode as real UTF-8: `l_json_body` may hold code points
+					-- above 255, which `to_string_8` would truncate.
+				l_temp_file.put_string ({UTF_CONVERTER}.string_32_to_utf_8_string_8 (l_json_body))
 				l_temp_file.close
 
 				-- Build curl command
@@ -234,6 +236,9 @@ feature {NONE} -- Implementation
 				l_curl_cmd.append (l_temp_path)
 
 				l_output := process_helper.shell_output (l_curl_cmd, Void)
+					-- curl's stdout arrives byte-widened, not UTF-8 decoded;
+					-- undo that before it reaches the JSON parser.
+				l_output := decode_process_bytes (l_output)
 
 				-- Clean up temp file
 				create l_temp_file.make_with_name (l_temp_path.to_string_8)
