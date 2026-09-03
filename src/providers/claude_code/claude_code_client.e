@@ -435,6 +435,11 @@ feature {NONE} -- Implementation
 				l_script_path := write_temp_file (build_batch_script (al_prompt, l_system_path), {STRING_32} "run.bat")
 				if attached l_script_path as al_script then
 					Result := process_helper.shell_output ({STRING_32} "cmd.exe /c %"" + al_script + {STRING_32} "%"", working_directory)
+						-- The child's stdout arrives byte-widened, not UTF-8
+						-- decoded (see `decode_process_bytes'); undo that here
+						-- so `last_raw_output' and the JSON parse below both
+						-- see the text the CLI actually wrote.
+					Result := decode_process_bytes (Result)
 					delete_temp_file (al_script)
 				end
 				delete_temp_file (al_prompt)

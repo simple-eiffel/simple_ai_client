@@ -19,6 +19,11 @@ Part of the [Simple Eiffel](https://github.com/simple-eiffel) ecosystem.
 - **Multi-provider support**: Ollama (local), Claude API, **Claude Code CLI on a Claude subscription** (`CLAUDE_CODE_CLIENT`, no API key), OpenAI
 - **Vector embeddings**: Semantic similarity search with local computation
 - **SQLite storage**: Persistent embedding store for error resolution patterns
+- **Correct Unicode round-trip**: all provider output is UTF-8-decoded once at the byte boundary, and every request body is UTF-8-encoded the same way, so an em-dash, Hebrew, Greek or emoji in a message survives intact in both directions
+
+## Encoding
+
+Every provider here shells out - curl for the HTTP APIs, `claude` for `CLAUDE_CODE_CLIENT` - through `SIMPLE_PROCESS`, which hands back a child process's stdout as raw bytes widened one-per-character into `STRING_32` rather than UTF-8 decoded. Left alone, that turns any non-ASCII character the model writes into mojibake (a real example: an em-dash arriving as the three characters `â€”`). `{AI_CLIENT}.decode_process_bytes` re-decodes that output as UTF-8 immediately after every `SIMPLE_PROCESS_HELPER.shell_output` call, in every provider; `OLLAMA_EMBEDDING_CLIENT`, which does not inherit `AI_CLIENT`, carries the same fix locally. The request direction is symmetric: a JSON request body is written to its temporary file with `{UTF_CONVERTER}.string_32_to_utf_8_string_8`, never `STRING_32.to_string_8` (which requires every character to already be in the 0-255 range and so cannot carry Hebrew, Greek or emoji at all).
 
 ## Installation
 

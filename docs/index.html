@@ -68,6 +68,7 @@
                 <li>Claude Code CLI provider on a Claude subscription, no API key (<code>CLAUDE_CODE_CLIENT</code>)</li>
                 <li>Claude Code CLI sandbox flags: tools off, settings sources pinned, strict MCP (<code>set_tools_disabled</code>, <code>set_setting_sources</code>, <code>set_strict_mcp_config</code>, verified by <code>extra_arguments</code>)</li>
                 <li>Claude Code CLI session resume: <code>set_resume_session</code> adds <code>--resume "&lt;uuid&gt;"</code>; only a UUID shape is accepted</li>
+                <li>Correct Unicode round-trip: all provider output is UTF-8-decoded once at the byte boundary, and every request body is UTF-8-encoded the same way</li>
                 <li>Vector embedding support</li>
                 <li>Semantic similarity search</li>
                 <li>Environment variable configuration</li>

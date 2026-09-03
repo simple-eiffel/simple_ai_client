@@ -21,6 +21,7 @@ feature {NONE} -- Initialization
 			run_embedding_tests
 			run_claude_offline_tests
 			run_claude_code_tests
+			run_utf8_boundary_tests
 			-- Note: the Ollama and Claude tests in TEST_OLLAMA_CLIENT and
 			-- TEST_CLAUDE_CLIENT need network access and a paid API call, so
 			-- they stay out of the automated runner. TEST_CLAUDE_CLIENT_OFFLINE
@@ -72,6 +73,23 @@ feature {NONE} -- Test Runners
 			run_test (agent claude_code_tests.test_live_round_trip, "test_live_round_trip")
 		end
 
+	run_utf8_boundary_tests
+		do
+			create utf8_boundary_tests
+			run_test (agent utf8_boundary_tests.test_decode_process_bytes_em_dash, "test_decode_process_bytes_em_dash")
+			run_test (agent utf8_boundary_tests.test_decode_process_bytes_hebrew, "test_decode_process_bytes_hebrew")
+			run_test (agent utf8_boundary_tests.test_decode_process_bytes_emoji, "test_decode_process_bytes_emoji")
+			run_test (agent utf8_boundary_tests.test_decode_process_bytes_greek, "test_decode_process_bytes_greek")
+			run_test (agent utf8_boundary_tests.test_decode_process_bytes_combined, "test_decode_process_bytes_combined")
+			run_test (agent utf8_boundary_tests.test_decode_process_bytes_ascii_passthrough, "test_decode_process_bytes_ascii_passthrough")
+			run_test (agent utf8_boundary_tests.test_decode_process_bytes_empty, "test_decode_process_bytes_empty")
+			run_test (agent utf8_boundary_tests.test_decode_process_bytes_leaves_real_unicode_alone, "test_decode_process_bytes_leaves_real_unicode_alone")
+			run_test (agent utf8_boundary_tests.test_real_process_round_trip, "test_real_process_round_trip")
+			run_test (agent utf8_boundary_tests.test_json_body_not_narrowable_to_string_8, "test_json_body_not_narrowable_to_string_8")
+			run_test (agent utf8_boundary_tests.test_utf8_encode_decode_round_trip, "test_utf8_encode_decode_round_trip")
+			run_test (agent utf8_boundary_tests.test_request_body_round_trip_through_a_real_process, "test_request_body_round_trip_through_a_real_process")
+		end
+
 	run_embedding_tests
 		do
 			create embedding_tests
@@ -106,6 +124,7 @@ feature {NONE} -- Implementation
 	embedding_tests: TEST_AI_EMBEDDING
 	claude_offline_tests: TEST_CLAUDE_CLIENT_OFFLINE
 	claude_code_tests: TEST_CLAUDE_CODE_CLIENT
+	utf8_boundary_tests: TEST_UTF8_BOUNDARY
 
 	passed: INTEGER
 	failed: INTEGER
