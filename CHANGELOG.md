@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (process output)
+- Process output is no longer UTF-8 decoded a second time. simple_process 1.1.0
+  decodes it; `decode_process_bytes` is now the identity (re-decoding garbled
+  text whose non-ASCII characters all lie in U+0080..U+00FF).
+
+
 ### Fixed
 - All providers (0.4.0): a child process's stdout - what every curl-based provider and `CLAUDE_CODE_CLIENT` read back through `SIMPLE_PROCESS_HELPER.shell_output` - was widened byte-for-byte into `STRING_32` rather than UTF-8 decoded, so any non-ASCII character the model wrote (an em-dash, Hebrew, Greek, emoji) arrived as mojibake (observed live: `... as @claude â€” happy to help ...` where the CLI had written a plain em-dash). `{AI_CLIENT}.decode_process_bytes` now re-decodes that output as UTF-8 immediately after every `shell_output` call, in `CLAUDE_CODE_CLIENT`, `CLAUDE_CLIENT`, `GOOGLE_AI_CLIENT`, `GROK_CLIENT`, `OPENAI_CLIENT` and `OLLAMA_CLIENT` (all three call sites); `OLLAMA_EMBEDDING_CLIENT`, which does not inherit `AI_CLIENT`, carries the same fix locally.
 - Request direction, symmetric bug: `OPENAI_CLIENT`, `GOOGLE_AI_CLIENT`, `GROK_CLIENT` and `OLLAMA_CLIENT` wrote their JSON request body to a temp file via `STRING_32.to_string_8`, which requires every character to be in the 0-255 range (`is_valid_as_string_8`) - a prompt containing Hebrew, Greek or emoji violates that precondition outright, since `SIMPLE_JSON_OBJECT.to_json_string` correctly decodes those characters to real Unicode code points before this call ever sees them. All four now write `{UTF_CONVERTER}.string_32_to_utf_8_string_8 (l_json_body)` instead, matching what `CLAUDE_CLIENT.write_request_body` and `CLAUDE_CODE_CLIENT.write_temp_file` already did correctly. `OLLAMA_EMBEDDING_CLIENT` additionally stopped embedding its JSON body directly on the curl command line (`escape_for_windows` only escaped quotes, and the whole command line is narrowed to `STRING_8` before `SIMPLE_PROCESS` ever runs it) and now writes it to a UTF-8 temp file and passes `-d @path`, like every other provider.
