@@ -120,9 +120,7 @@ feature -- Embedding operations
 
 			l_curl_cmd := build_curl_command (Endpoint_embeddings, l_temp_path)
 			l_output := process_helper.shell_output (l_curl_cmd, Void)
-				-- curl's stdout arrives byte-widened, not UTF-8 decoded;
-				-- undo that before it reaches the JSON parser.
-			l_output := decode_process_bytes (l_output)
+			-- Already UTF-8 decoded by SIMPLE_PROCESS (1.1.0).
 
 			create l_temp_file.make_with_name (l_temp_path.to_string_8)
 			if l_temp_file.exists then
@@ -193,21 +191,23 @@ feature {NONE} -- Implementation
 		end
 
 	decode_process_bytes (a_raw: STRING_32): STRING_32
-			-- `a_raw' re-decoded as UTF-8, undoing the byte-widening
-			-- `SIMPLE_PROCESS' applies to a child process's stdout. See
-			-- {AI_CLIENT}.decode_process_bytes, which every other provider
-			-- in this library shares through inheritance; this class does
-			-- not inherit {AI_CLIENT} (its shape is embeddings, not chat),
-			-- so the same small fix is kept here instead.
+			-- `a_raw', unchanged.
+			--
+			-- Until simple_process 1.1.0, `SIMPLE_PROCESS.last_output' (what
+			-- `SIMPLE_PROCESS_HELPER.shell_output' returns, and what every
+			-- provider's `execute_chat' receives from curl or the claude CLI)
+			-- widened each byte of the child's stdout into one STRING_32
+			-- character instead of decoding it, and this routine re-decoded
+			-- that as UTF-8. simple_process 1.1.0 decodes UTF-8 itself, so
+			-- re-decoding again would corrupt text whose non-ASCII characters
+			-- all lie in U+0080..U+00FF ("caf%/0xE9/" narrowed to the lone byte
+			-- E9, which is not UTF-8). The providers no longer call this; it is
+			-- kept, as the identity, for any caller outside this library.
 		do
-			if a_raw.is_valid_as_string_8 then
-				Result := {UTF_CONVERTER}.utf_8_string_8_to_string_32 (a_raw.to_string_8)
-			else
-				Result := a_raw
-			end
+			Result := a_raw
 		ensure
 			result_attached: Result /= Void
-			identity_when_not_narrowable: not a_raw.is_valid_as_string_8 implies Result = a_raw
+			identity: Result = a_raw
 		end
 
 	parse_embedding_response (a_output: STRING_32; a_source_text: STRING_32): AI_EMBEDDING_RESPONSE

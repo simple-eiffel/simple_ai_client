@@ -60,8 +60,7 @@ feature -- Status report
 			l_curl_cmd.append (base_url)
 			l_curl_cmd.append (Endpoint_tags)
 			l_output := process_helper.shell_output (l_curl_cmd, Void)
-				-- curl's stdout arrives byte-widened, not UTF-8 decoded.
-			l_output := decode_process_bytes (l_output)
+			-- Already UTF-8 decoded by SIMPLE_PROCESS (1.1.0).
 			Result := not l_output.is_empty and then l_output.has_substring ("models")
 		end
 
@@ -105,9 +104,7 @@ feature -- Model listing
 			l_curl_cmd.append (Endpoint_tags)
 
 			l_output := process_helper.shell_output (l_curl_cmd, Void)
-				-- curl's stdout arrives byte-widened, not UTF-8 decoded;
-				-- undo that before it reaches the JSON parser.
-			l_output := decode_process_bytes (l_output)
+			-- Already UTF-8 decoded by SIMPLE_PROCESS (1.1.0).
 
 			-- Parse JSON response
 			l_response_value := json.parse_response (l_output)
@@ -185,9 +182,7 @@ feature {NONE} -- Implementation
 			l_curl_cmd.append (l_temp_path)
 			
 			l_output := process_helper.shell_output (l_curl_cmd, Void)
-				-- curl's stdout arrives byte-widened, not UTF-8 decoded;
-				-- undo that before it reaches the JSON parser.
-			l_output := decode_process_bytes (l_output)
+			-- Already UTF-8 decoded by SIMPLE_PROCESS (1.1.0).
 
 			-- Clean up temp file
 			create l_temp_file.make_with_name (l_temp_path.to_string_8)

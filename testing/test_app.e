@@ -76,15 +76,13 @@ feature {NONE} -- Test Runners
 	run_utf8_boundary_tests
 		do
 			create utf8_boundary_tests
-			run_test (agent utf8_boundary_tests.test_decode_process_bytes_em_dash, "test_decode_process_bytes_em_dash")
-			run_test (agent utf8_boundary_tests.test_decode_process_bytes_hebrew, "test_decode_process_bytes_hebrew")
-			run_test (agent utf8_boundary_tests.test_decode_process_bytes_emoji, "test_decode_process_bytes_emoji")
-			run_test (agent utf8_boundary_tests.test_decode_process_bytes_greek, "test_decode_process_bytes_greek")
-			run_test (agent utf8_boundary_tests.test_decode_process_bytes_combined, "test_decode_process_bytes_combined")
+			run_test (agent utf8_boundary_tests.test_decode_process_bytes_is_the_identity, "test_decode_process_bytes_is_the_identity")
+			run_test (agent utf8_boundary_tests.test_decode_process_bytes_keeps_latin_1_text, "test_decode_process_bytes_keeps_latin_1_text")
 			run_test (agent utf8_boundary_tests.test_decode_process_bytes_ascii_passthrough, "test_decode_process_bytes_ascii_passthrough")
 			run_test (agent utf8_boundary_tests.test_decode_process_bytes_empty, "test_decode_process_bytes_empty")
 			run_test (agent utf8_boundary_tests.test_decode_process_bytes_leaves_real_unicode_alone, "test_decode_process_bytes_leaves_real_unicode_alone")
 			run_test (agent utf8_boundary_tests.test_real_process_round_trip, "test_real_process_round_trip")
+			run_test (agent utf8_boundary_tests.test_real_process_latin_1_round_trip, "test_real_process_latin_1_round_trip")
 			run_test (agent utf8_boundary_tests.test_json_body_not_narrowable_to_string_8, "test_json_body_not_narrowable_to_string_8")
 			run_test (agent utf8_boundary_tests.test_utf8_encode_decode_round_trip, "test_utf8_encode_decode_round_trip")
 			run_test (agent utf8_boundary_tests.test_request_body_round_trip_through_a_real_process, "test_request_body_round_trip_through_a_real_process")

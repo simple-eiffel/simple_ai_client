@@ -1,18 +1,22 @@
 note
 	description: "[
 		Vectors for the UTF-8 byte boundary every curl/CLI-based provider
-		crosses twice: `SIMPLE_PROCESS' widens a child process's stdout
-		bytes into STRING_32 one byte per character rather than decoding
-		them, and the JSON request body a provider writes to a temp file
-		must reach the child as real UTF-8 bytes rather than a STRING_32
-		narrowed byte-for-byte.
+		crosses twice: a child process's stdout coming back, and the JSON
+		request body a provider writes to a temp file, which must reach the
+		child as real UTF-8 bytes rather than a STRING_32 narrowed
+		byte-for-byte.
+
+		Until simple_process 1.1.0, `SIMPLE_PROCESS' widened the child's
+		stdout bytes into STRING_32 one byte per character, and
+		`decode_process_bytes' re-decoded them. 1.1.0 decodes UTF-8 itself,
+		so `decode_process_bytes' is now the identity, and the real-process
+		tests below check the decoded text directly.
 
 		Observed live 2026-09-02: simple_chat's server ran `claude -p'
 		through CLAUDE_CODE_CLIENT and the bot's reply reached the room as
 		"... as @claude %/0xE2/%/0x80/%/0x94/ happy to help ..." - code
 		points U+00E2 U+0080 U+0094 stored where the CLI wrote a single
-		em-dash (UTF-8 bytes E2 80 94). `test_decode_process_bytes_combined'
-		reproduces that exact line.
+		em-dash (UTF-8 bytes E2 80 94).
 
 		Byte sequences are hand-computed from RFC 3629, not read back from
 		the library under test: E2 80 94 (em-dash, U+2014), D7 A9 D7 9C D7
@@ -30,90 +34,35 @@ inherit
 
 feature -- Test routines: response direction (decode_process_bytes)
 
-	test_decode_process_bytes_em_dash
-			-- Three widened bytes (E2 80 94) recover the one character
-			-- U+2014, not the three-character mojibake `SIMPLE_PROCESS'
-			-- currently hands back.
+	test_decode_process_bytes_is_the_identity
+			-- Since simple_process 1.1.0 process output arrives decoded, so
+			-- `decode_process_bytes' must not decode it again: what looks
+			-- like widened bytes stays exactly as it is.
 		note
 			testing: "covers/{AI_CLIENT}.decode_process_bytes"
 		local
 			l_client: CLAUDE_CODE_CLIENT
-			l_raw, l_expected: STRING_32
+			l_text: STRING_32
 		do
 			create l_client.make
-			l_raw := {STRING_32} "%/0xE2/%/0x80/%/0x94/"
-			l_expected := {STRING_32} "%/0x2014/"
-			assert_false ("raw is three-character mojibake, not the em-dash",
-				l_raw.same_string (l_expected))
-			assert_strings_equal ("em-dash recovered", l_expected, l_client.decode_process_bytes (l_raw))
+			l_text := {STRING_32} "as @claude %/0xE2/%/0x80/%/0x94/ happy to help"
+			assert_strings_equal ("unchanged", l_text, l_client.decode_process_bytes (l_text))
 		end
 
-	test_decode_process_bytes_hebrew
-			-- D7 A9 D7 9C D7 95 D7 9D (8 widened bytes) recover the four
-			-- characters of shalom.
+	test_decode_process_bytes_keeps_latin_1_text
+			-- The case the old re-decode broke once simple_process decoded
+			-- UTF-8 itself: text whose non-ASCII characters are all in
+			-- U+0080..U+00FF ("caf%/0xE9/ na%/0xEF/ve") narrowed to bytes that
+			-- are not UTF-8.
 		note
 			testing: "covers/{AI_CLIENT}.decode_process_bytes"
 		local
 			l_client: CLAUDE_CODE_CLIENT
-			l_raw, l_expected: STRING_32
+			l_text: STRING_32
 		do
 			create l_client.make
-			l_raw := {STRING_32} "%/0xD7/%/0xA9/%/0xD7/%/0x9C/%/0xD7/%/0x95/%/0xD7/%/0x9D/"
-			l_expected := {STRING_32} "%/0x5E9/%/0x5DC/%/0x5D5/%/0x5DD/"
-			assert_false ("raw is eight-character mojibake, not shalom",
-				l_raw.same_string (l_expected))
-			assert_strings_equal ("shalom recovered", l_expected, l_client.decode_process_bytes (l_raw))
-		end
-
-	test_decode_process_bytes_emoji
-			-- F0 9F A4 96 (four widened bytes, one astral-plane character)
-			-- recover the single robot emoji U+1F916.
-		note
-			testing: "covers/{AI_CLIENT}.decode_process_bytes"
-		local
-			l_client: CLAUDE_CODE_CLIENT
-			l_raw, l_expected: STRING_32
-		do
-			create l_client.make
-			l_raw := {STRING_32} "%/0xF0/%/0x9F/%/0xA4/%/0x96/"
-			l_expected := {STRING_32} "%/0x1F916/"
-			assert_false ("raw is four-character mojibake, not the emoji",
-				l_raw.same_string (l_expected))
-			assert_strings_equal ("emoji recovered", l_expected, l_client.decode_process_bytes (l_raw))
-		end
-
-	test_decode_process_bytes_greek
-			-- CE A7 CF 81 (four widened bytes) recover the two characters
-			-- Chi-rho.
-		note
-			testing: "covers/{AI_CLIENT}.decode_process_bytes"
-		local
-			l_client: CLAUDE_CODE_CLIENT
-			l_raw, l_expected: STRING_32
-		do
-			create l_client.make
-			l_raw := {STRING_32} "%/0xCE/%/0xA7/%/0xCF/%/0x81/"
-			l_expected := {STRING_32} "%/0x3A7/%/0x3C1/"
-			assert_false ("raw is four-character mojibake, not Chi-rho",
-				l_raw.same_string (l_expected))
-			assert_strings_equal ("Chi-rho recovered", l_expected, l_client.decode_process_bytes (l_raw))
-		end
-
-	test_decode_process_bytes_combined
-			-- The exact live failure, reproduced: "as @claude <mojibake>
-			-- happy to help", plus shalom, the robot and Chi-rho mixed
-			-- into one line, the shape of a real assistant reply.
-		note
-			testing: "covers/{AI_CLIENT}.decode_process_bytes"
-		local
-			l_client: CLAUDE_CODE_CLIENT
-			l_raw, l_expected: STRING_32
-		do
-			create l_client.make
-			l_raw := {STRING_32} "as @claude %/0xE2/%/0x80/%/0x94/ happy to help: %/0xD7/%/0xA9/%/0xD7/%/0x9C/%/0xD7/%/0x95/%/0xD7/%/0x9D/ %/0xF0/%/0x9F/%/0xA4/%/0x96/ %/0xCE/%/0xA7/%/0xCF/%/0x81/"
-			l_expected := {STRING_32} "as @claude %/0x2014/ happy to help: %/0x5E9/%/0x5DC/%/0x5D5/%/0x5DD/ %/0x1F916/ %/0x3A7/%/0x3C1/"
-			assert_false ("raw combined line is mojibake, not the reply", l_raw.same_string (l_expected))
-			assert_strings_equal ("full line recovered", l_expected, l_client.decode_process_bytes (l_raw))
+			l_text := {STRING_32} "caf%/0xE9/ na%/0xEF/ve"
+			assert_strings_equal ("unchanged", l_text, l_client.decode_process_bytes (l_text))
 		end
 
 	test_decode_process_bytes_ascii_passthrough
@@ -198,15 +147,51 @@ feature -- Test routines: response direction, a real child process
 				l_file.delete
 			end
 
-				-- RED: today's `SIMPLE_PROCESS' hands back byte-widened
-				-- mojibake, not the text that was written - reproduced
-				-- live rather than assumed.
-			assert_false ("raw child output is mojibake, not the source text",
-				l_raw.same_string (l_source))
-
-				-- GREEN: `decode_process_bytes' recovers it exactly.
+				-- Before simple_process 1.1.0 this came back byte-widened
+				-- (mojibake); 1.1.0 decodes UTF-8 itself.
+			assert_strings_equal ("child output is the source text, decoded once",
+				l_source, l_raw)
 			create l_client.make
-			assert_strings_equal ("decoded output matches the source text",
+			assert_strings_equal ("and decode_process_bytes leaves it so",
+				l_source, l_client.decode_process_bytes (l_raw))
+		end
+
+	test_real_process_latin_1_round_trip
+			-- "caf%/0xE9/ na%/0xEF/ve" through a real child: every non-ASCII
+			-- character is in U+0080..U+00FF, the shape the old re-decode
+			-- turned into replacement characters.
+		note
+			testing: "covers/{AI_CLIENT}.decode_process_bytes"
+		local
+			l_helper: SIMPLE_PROCESS_HELPER
+			l_client: CLAUDE_CODE_CLIENT
+			l_env: EXECUTION_ENVIRONMENT
+			l_uuid: SIMPLE_UUID
+			l_file: RAW_FILE
+			l_dir, l_path: STRING_32
+			l_source, l_raw: STRING_32
+		do
+			l_source := {STRING_32} "caf%/0xE9/ na%/0xEF/ve"
+			create l_env
+			if attached l_env.item ({STRING_32} "TEMP") as al_temp and then not al_temp.is_empty then
+				l_dir := al_temp.to_string_32
+			else
+				l_dir := {STRING_32} "."
+			end
+			create l_uuid.make
+			l_path := l_dir + {STRING_32} "\simple_ai_latin1_test_" + l_uuid.new_v4_compact.to_string_32 + {STRING_32} ".txt"
+			create l_file.make_with_name (l_path)
+			l_file.create_read_write
+			l_file.put_string ({UTF_CONVERTER}.string_32_to_utf_8_string_8 (l_source))
+			l_file.close
+			create l_helper
+			l_raw := l_helper.shell_output ({STRING_32} "cmd.exe /c type %"" + l_path + {STRING_32} "%"", Void)
+			create l_file.make_with_name (l_path)
+			if l_file.exists then
+				l_file.delete
+			end
+			create l_client.make
+			assert_strings_equal ("the provider path sees the text that was written",
 				l_source, l_client.decode_process_bytes (l_raw))
 		end
 

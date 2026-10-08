@@ -200,9 +200,7 @@ feature {NONE} -- Implementation
 			l_curl_cmd.append (l_temp_path)
 			
 			l_output := process_helper.shell_output (l_curl_cmd, Void)
-				-- curl's stdout arrives byte-widened, not UTF-8 decoded;
-				-- undo that before it reaches the JSON parser.
-			l_output := decode_process_bytes (l_output)
+			-- Already UTF-8 decoded by SIMPLE_PROCESS (1.1.0).
 			
 			create l_temp_file.make_with_name (l_temp_path.to_string_8)
 			if l_temp_file.exists then
