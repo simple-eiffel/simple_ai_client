@@ -173,6 +173,40 @@ end
 
 `CLAUDE_CLIENT` never places the API key on the command line (curl `--variable %%ENV` + `--expand-header`), sends the body by temporary file, knows the current models (`claude-opus-5`, `claude-sonnet-5`, `claude-haiku-4-5`, `claude-fable-5`) with per-model costing, and surfaces refusals and truncation. `curl_command_preview` lets a test prove the key is absent from the command.
 
+### Local llama.cpp server (thinking models, streaming)
+
+`LLAMA_SERVER` runs `llama-server.exe` for the life of your program (hidden, on 127.0.0.1 only, ended by Windows even if your program crashes) and `LLAMA_CPP_CLIENT` chats with it over the OpenAI-compatible `/v1/chat/completions` endpoint. Built for thinking models such as Qwen 3.8 27B and its Swift 1.5 fine-tune on a 16 GB card:
+
+```eiffel
+local
+    settings: LLAMA_SERVER_SETTINGS
+    server: LLAMA_SERVER
+    client: LLAMA_CPP_CLIENT
+    response: AI_RESPONSE
+do
+    create settings.make ("D:\llama\llama-server.exe", "D:\models\Swift-1.5-Qwen3.8-27B-GSQ-RCO-IQ3_S-mtp.gguf")
+    settings.set_port (8790)
+    settings.set_context_size (0)       -- let llama.cpp fit the window to free GPU memory
+    settings.set_kv_cache_type ("q8_0")
+    settings.enable_mtp (3)             -- multi-token prediction: ~1.7x faster here
+    create server.make (settings)
+    server.start
+    if server.wait_ready (300) then
+        create client.make_with_base_url (server.base_url)
+        client.set_reasoning_effort ("low")   -- omit: the template default (xhigh for Qwen 3.8)
+        response := client.chat_streaming (<<create {AI_MESSAGE}.make_user ("What is chesed?")>>,
+            agent show_thinking, agent show_answer)
+        -- client.last_reasoning holds the thinking; response.text only the answer
+    end
+    server.stop
+end
+```
+
+- **Reasoning effort** travels per request as `chat_template_kwargs.reasoning_effort`; with none set, nothing is sent and the template's default applies. `turn_thinking_off` sends `enable_thinking: false`.
+- **Streaming**: `chat_streaming` reads curl's event stream through `SIMPLE_ASYNC_PROCESS` (every waiting external `C blocking`) and hands thinking and answer to two agents as they arrive. `LLAMA_REPLY_DECODER` is the pure parser behind it, tested against a stream captured from llama-server build 12069.
+- **Fit, don't guess the context.** Measured on an RTX 5070 Ti with the desktop running: a hand-set 110,000-token window over-filled the card and Windows spilled into system memory (11 tokens/s); `set_context_size (0)` let llama.cpp fit 46,848 tokens and ran at 78-118 tokens/s. A 4-bit cache (`"q4_0"`) fits about 74,000.
+- Live tests (need a server on 127.0.0.1:8790): target `simple_ai_client_llama_live`. They fail, never skip, when no server answers.
+
 ## Classes
 
 | Class | Purpose |
@@ -185,6 +219,10 @@ end
 | `OLLAMA_EMBEDDING_CLIENT` | Embeddings via Ollama `/api/embeddings` |
 | `CLAUDE_CLIENT` | Chat completions via the Anthropic API (metered key) |
 | `CLAUDE_CODE_CLIENT` | Chat completions through the local `claude -p` CLI, billed to the Claude.ai subscription - no API key |
+| `LLAMA_SERVER_SETTINGS` | How to launch `llama-server`: model, port, context (or fit), cache type, MTP |
+| `LLAMA_SERVER` | Starts/reuses/stops a local `llama-server`, waits for `/health` |
+| `LLAMA_CPP_CLIENT` | Chat with `llama-server`: reasoning effort, thinking kept apart, streaming |
+| `LLAMA_REPLY_DECODER` | Pure parser for llama-server replies, whole or streamed |
 | `AI_RESPONSE` | Response wrapper for chat operations |
 
 ## Embedding Models
