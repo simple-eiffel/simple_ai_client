@@ -34,4 +34,7 @@
 		<setting name="console_application" value="true"/>
 		<cluster name="test" location=".\testing\" recursive="true"/>
 	</target>
+	<target name="simple_ai_client_llama_live" extends="simple_ai_client_tests">
+		<root class="LLAMA_LIVE_TEST_APP" feature="make"/>
+	</target>
 </system>

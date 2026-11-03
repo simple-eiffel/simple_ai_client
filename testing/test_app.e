@@ -22,6 +22,7 @@ feature {NONE} -- Initialization
 			run_claude_offline_tests
 			run_claude_code_tests
 			run_utf8_boundary_tests
+			run_llama_cpp_offline_tests
 			-- Note: the Ollama and Claude tests in TEST_OLLAMA_CLIENT and
 			-- TEST_CLAUDE_CLIENT need network access and a paid API call, so
 			-- they stay out of the automated runner. TEST_CLAUDE_CLIENT_OFFLINE
@@ -88,6 +89,31 @@ feature {NONE} -- Test Runners
 			run_test (agent utf8_boundary_tests.test_request_body_round_trip_through_a_real_process, "test_request_body_round_trip_through_a_real_process")
 		end
 
+	run_llama_cpp_offline_tests
+		do
+			create llama_cpp_tests
+			run_test (agent llama_cpp_tests.test_stream_split_anywhere, "test_stream_split_anywhere")
+			run_test (agent llama_cpp_tests.test_stream_fresh_text, "test_stream_fresh_text")
+			run_test (agent llama_cpp_tests.test_stream_figures, "test_stream_figures")
+			run_test (agent llama_cpp_tests.test_stream_unicode, "test_stream_unicode")
+			run_test (agent llama_cpp_tests.test_stream_error_event, "test_stream_error_event")
+			run_test (agent llama_cpp_tests.test_stream_curl_noise, "test_stream_curl_noise")
+			run_test (agent llama_cpp_tests.test_stream_crlf_and_comments, "test_stream_crlf_and_comments")
+			run_test (agent llama_cpp_tests.test_real_stream_capture, "test_real_stream_capture")
+			run_test (agent llama_cpp_tests.test_fit_command, "test_fit_command")
+			run_test (agent llama_cpp_tests.test_thinking_off, "test_thinking_off")
+			run_test (agent llama_cpp_tests.test_whole_reply, "test_whole_reply")
+			run_test (agent llama_cpp_tests.test_whole_not_json, "test_whole_not_json")
+			run_test (agent llama_cpp_tests.test_default_command_matches_rixqwen, "test_default_command_matches_rixqwen")
+			run_test (agent llama_cpp_tests.test_swift_command, "test_swift_command")
+			run_test (agent llama_cpp_tests.test_cache_type_validation, "test_cache_type_validation")
+			run_test (agent llama_cpp_tests.test_request_without_effort, "test_request_without_effort")
+			run_test (agent llama_cpp_tests.test_request_with_effort, "test_request_with_effort")
+			run_test (agent llama_cpp_tests.test_effort_validation, "test_effort_validation")
+			run_test (agent llama_cpp_tests.test_curl_command, "test_curl_command")
+			run_test (agent llama_cpp_tests.test_dead_server_is_an_error, "test_dead_server_is_an_error")
+		end
+
 	run_embedding_tests
 		do
 			create embedding_tests
@@ -123,6 +149,7 @@ feature {NONE} -- Implementation
 	claude_offline_tests: TEST_CLAUDE_CLIENT_OFFLINE
 	claude_code_tests: TEST_CLAUDE_CODE_CLIENT
 	utf8_boundary_tests: TEST_UTF8_BOUNDARY
+	llama_cpp_tests: TEST_LLAMA_CPP_OFFLINE
 
 	passed: INTEGER
 	failed: INTEGER

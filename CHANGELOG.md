@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (llama.cpp provider, 2026-11-03)
+- `LLAMA_SERVER_SETTINGS`, `LLAMA_SERVER`, `LLAMA_CPP_CLIENT`, `LLAMA_REPLY_DECODER`: run a local `llama-server` (loopback only, ends with its owner) and chat with it. Reasoning effort per request (`chat_template_kwargs`), thinking switch (`enable_thinking`), thinking kept apart from the answer (`last_reasoning`), streaming to agents (`chat_streaming`), generation speed and token counts from the reply's `timings`/`usage`. `set_context_size (0)` leaves `-c`/`-ngl` unset so llama.cpp's fit can size the window to free GPU memory.
+- 20 offline tests (`TEST_LLAMA_CPP_OFFLINE`, in the default suite, including a stream captured from llama-server b12069) and 3 live tests (`TEST_LLAMA_CPP_LIVE`, target `simple_ai_client_llama_live`).
+
 ### Fixed (process output)
 - Process output is no longer UTF-8 decoded a second time. simple_process 1.1.0
   decodes it; `decode_process_bytes` is now the identity (re-decoding garbled
