@@ -235,12 +235,24 @@ feature -- Eiffel Coding with Ollama
 		once
 			create Result.make_from_string_general ("NEED: I need a shopping cart that holds items and calculates totals. Follow the guidance found in the eiffel_mini_guide below. Give me your results as JSON. %N%N")
 
-			create l_file.make_open_read ("C:\Users\LJR19\OneDrive\Desktop\Eiffel-libs\claude-instruction-pack\eiffel_mini_guide.txt")
+			create l_file.make_open_read (home_path + {STRING_32} "\OneDrive\Desktop\Eiffel-libs\claude-instruction-pack\eiffel_mini_guide.txt")
 			l_file.read_stream (l_file.count)
 			Result.append (l_file.last_string)
 			l_file.close
 		ensure
 			result_not_empty: not Result.is_empty
+		end
+
+feature {NONE} -- Paths
+
+	home_path: STRING_32
+			-- This user's home folder.
+		do
+			if attached (create {EXECUTION_ENVIRONMENT}).item ("USERPROFILE") as al_home then
+				create Result.make_from_string_general (al_home)
+			else
+				create Result.make_empty
+			end
 		end
 
 note
