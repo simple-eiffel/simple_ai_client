@@ -20,6 +20,10 @@ note
 		temp file (UTF-8 survives; no command-line length limit), as the
 		other providers in this library do. LLAMA_SERVER starts the
 		server; this class only talks to one.
+
+		A server started with "--api-key" (LLAMA_SERVER_SETTINGS.set_api_key)
+		needs the same key here: `set_api_key' sends it as
+		"Authorization: Bearer KEY" on every request.
 	]"
 	author: "Larry Rix"
 	date: "$Date$"
@@ -30,6 +34,8 @@ class
 
 inherit
 	AI_CLIENT
+
+	LLAMA_KEY_RULES
 
 create
 	make,
@@ -79,6 +85,9 @@ feature -- Access
 
 	base_url: STRING_32
 			-- Server root.
+
+	api_key: detachable STRING_32
+			-- Key sent as "Authorization: Bearer"; Void sends none.
 
 	reasoning_effort: detachable STRING_32
 			-- Effort sent to the chat template ("low", "medium", "xhigh"
@@ -154,7 +163,7 @@ feature -- Model validation
 		do
 			create Result.make (1)
 			create l_process.make
-			l_output := l_process.command_output ({STRING_32} "curl.exe -s --max-time 5 %"" + base_url + {STRING_32} "/v1/models%"")
+			l_output := l_process.command_output ({STRING_32} "curl.exe -s --max-time 5" + authorization_option + {STRING_32} " %"" + base_url + {STRING_32} "/v1/models%"")
 			if not l_output.is_empty then
 				create l_json
 				if attached l_json.parse (l_output) as al_value and then al_value.is_object and then
@@ -175,6 +184,24 @@ feature -- Element change
 			-- Label requests with `a_model'.
 		do
 			model := a_model
+		end
+
+	set_api_key (a_key: READABLE_STRING_GENERAL)
+			-- Send `a_key' with every request.
+		require
+			valid: is_valid_api_key (a_key)
+		do
+			api_key := a_key.to_string_32
+		ensure
+			set: attached api_key as al_key and then al_key.same_string_general (a_key)
+		end
+
+	remove_api_key
+			-- Send no key.
+		do
+			api_key := Void
+		ensure
+			cleared: api_key = Void
 		end
 
 	set_reasoning_effort (a_effort: READABLE_STRING_GENERAL)
@@ -384,6 +411,7 @@ feature -- Request building (public for tests)
 			end
 			Result.append ({STRING_32} " --max-time ")
 			Result.append (timeout_seconds.out)
+			Result.append (authorization_option)
 			Result.append ({STRING_32} " -X POST -H %"Content-Type: application/json%" --data-binary %"@")
 			Result.append_string_general (a_body_path)
 			Result.append ({STRING_32} "%" %"")
@@ -392,6 +420,20 @@ feature -- Request building (public for tests)
 		ensure
 			posts_body: Result.has_substring ({STRING_32} "@" + a_body_path.to_string_32)
 			unbuffered_when_streaming: a_stream implies Result.has_substring ({STRING_32} " -N ")
+			key_iff_set: Result.has_substring ({STRING_32} "Authorization: Bearer ") = attached api_key
+		end
+
+	authorization_option: STRING_32
+			-- The curl header option carrying `api_key' (with a leading
+			-- space), or "" when there is none.
+		do
+			if attached api_key as al_key then
+				Result := {STRING_32} " -H %"Authorization: Bearer " + al_key + {STRING_32} "%""
+			else
+				create Result.make_empty
+			end
+		ensure
+			empty_without_key: (api_key = Void) = Result.is_empty
 		end
 
 feature {NONE} -- Implementation
@@ -568,6 +610,7 @@ invariant
 	base_url_not_empty: not base_url.is_empty
 	model_not_empty: not model.is_empty
 	effort_valid: attached reasoning_effort as al_effort implies is_valid_effort (al_effort)
+	key_valid: attached api_key as al_key implies is_valid_api_key (al_key)
 	max_tokens_non_negative: max_tokens >= 0
 	timeout_positive: timeout_seconds > 0
 	reasoning_attached: last_reasoning /= Void

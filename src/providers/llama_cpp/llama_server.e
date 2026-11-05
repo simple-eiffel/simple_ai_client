@@ -6,6 +6,10 @@ note
 		leaves it running at `stop'); otherwise it launches one, hidden,
 		tied to this program so Windows ends it even if the program
 		crashes. `wait_ready' polls /health until the model has loaded.
+		`start' reuses a live server only if it accepts `settings''s key, or
+		no key when the settings carry none; otherwise it reports why in
+		`last_error' (a server locked by another program's key would
+		refuse every request).
 
 		    create l_server.make (l_settings)
 		    l_server.start
@@ -78,6 +82,39 @@ feature -- Status report
 			Result := l_process.was_successful and then l_output.has_substring ({STRING_32} "200")
 		end
 
+	accepts_settings_key: BOOLEAN
+			-- Does the server on the port answer /props (which demands the
+			-- key on a locked server) with HTTP 200, sending `settings''s key
+			-- if it has one? False when nothing answers.
+		local
+			l_process: SIMPLE_PROCESS
+			l_command, l_output: STRING_32
+		do
+			l_command := {STRING_32} "curl.exe -s -o NUL --max-time 2 -w %"%%{http_code}%""
+			if attached settings.api_key as al_key then
+				l_command.append ({STRING_32} " -H %"Authorization: Bearer " + al_key + {STRING_32} "%"")
+			end
+			l_command.append ({STRING_32} " %"" + base_url + {STRING_32} "/props%"")
+			create l_process.make
+			l_output := l_process.command_output (l_command)
+			Result := l_process.was_successful and then l_output.has_substring ({STRING_32} "200")
+		end
+
+	server_supports (a_flag: READABLE_STRING_GENERAL): BOOLEAN
+			-- Does `settings.server_exe --help' list `a_flag'? (Older builds
+			-- refuse to start on a flag they do not know.)
+		require
+			is_flag: a_flag.to_string_32.starts_with ({STRING_32} "--")
+			no_quote: not a_flag.has ('"')
+		local
+			l_process: SIMPLE_PROCESS
+			l_output: STRING_32
+		do
+			create l_process.make
+			l_output := l_process.command_output ({STRING_32} "%"" + settings.server_exe + {STRING_32} "%" --help")
+			Result := l_output.has_substring (a_flag.to_string_32 + {STRING_32} " ")
+		end
+
 	is_running: BOOLEAN
 			-- Is the server we launched still alive?
 		do
@@ -89,7 +126,8 @@ feature -- Status report
 feature -- Operations
 
 	start
-			-- Make sure a server is listening: reuse a live one, else launch ours.
+			-- Make sure a server is listening: reuse a live one that takes
+			-- `settings''s key (or none, if unlocked), else launch ours.
 		require
 			not_already_ours: not started_here
 		local
@@ -97,7 +135,12 @@ feature -- Operations
 		do
 			last_error.wipe_out
 			log_tail.wipe_out
-			if not is_up then
+			if is_up then
+				if not accepts_settings_key then
+					last_error := {STRING_32} "port " + settings.port.out
+						+ {STRING_32} " already has a llama-server that this program did not start and that is locked with another key (another window?). Close it or choose another port."
+				end
+			else
 				create l_process.make
 				l_process.set_show_window (False)
 				l_process.set_ends_with_owner (True)
@@ -112,7 +155,7 @@ feature -- Operations
 				end
 			end
 		ensure
-			reused_without_error: (old is_up) implies (not started_here and last_error.is_empty)
+			reused_not_launched: (old is_up) implies not started_here
 			failed_launch_explained: (not (old is_up) and not started_here) implies not last_error.is_empty
 		end
 

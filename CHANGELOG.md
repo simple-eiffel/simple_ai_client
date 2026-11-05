@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (llama.cpp server lock, 2026-11-03)
+- `LLAMA_SERVER_SETTINGS.set_api_key` / `remove_api_key` / `is_locked` add `--api-key KEY`. `allow_local_origins_only` / `allow_any_origin` add `--cors-origins localhost`. Both are off by default, so existing command lines are unchanged.
+- `LLAMA_CPP_CLIENT.set_api_key` / `remove_api_key` send `Authorization: Bearer KEY` on chat and `/v1/models`.
+- `LLAMA_KEY_RULES.is_valid_api_key`: 16–128 characters of ASCII letters, digits, `-` and `_`.
+- `LLAMA_SERVER.accepts_settings_key` (probes `/props`) and `server_supports (flag)` (reads `--help`).
+- Why: llama-server allows every origin by default, so a web page in the user's browser could drive a loopback server.
+- Measured on builds 10001 and 12069: with a key, chat, `/props` and `/slots` answer 401 without it, and `/health` stays open. Build 10001 rejects `--cors-origins`.
+- 3 offline tests (75 in the default suite).
+
+### Changed
+- `LLAMA_SERVER.start` reuses a live server only if it accepts the settings' key (or no key, when unlocked); otherwise it sets `last_error`. Before, it reused any server answering `/health`, even one locked with another program's key, which then refused every request.
+
 ### Added (llama.cpp provider, 2026-11-03)
 - `LLAMA_SERVER_SETTINGS`, `LLAMA_SERVER`, `LLAMA_CPP_CLIENT`, `LLAMA_REPLY_DECODER`: run a local `llama-server` (loopback only, ends with its owner) and chat with it. Reasoning effort per request (`chat_template_kwargs`), thinking switch (`enable_thinking`), thinking kept apart from the answer (`last_reasoning`), streaming to agents (`chat_streaming`), generation speed and token counts from the reply's `timings`/`usage`. `set_context_size (0)` leaves `-c`/`-ngl` unset so llama.cpp's fit can size the window to free GPU memory.
 - 20 offline tests (`TEST_LLAMA_CPP_OFFLINE`, in the default suite, including a stream captured from llama-server b12069) and 3 live tests (`TEST_LLAMA_CPP_LIVE`, target `simple_ai_client_llama_live`).

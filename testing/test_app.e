@@ -112,6 +112,9 @@ feature {NONE} -- Test Runners
 			run_test (agent llama_cpp_tests.test_effort_validation, "test_effort_validation")
 			run_test (agent llama_cpp_tests.test_curl_command, "test_curl_command")
 			run_test (agent llama_cpp_tests.test_dead_server_is_an_error, "test_dead_server_is_an_error")
+			run_test (agent llama_cpp_tests.test_locked_command, "test_locked_command")
+			run_test (agent llama_cpp_tests.test_api_key_validation, "test_api_key_validation")
+			run_test (agent llama_cpp_tests.test_curl_sends_key, "test_curl_sends_key")
 		end
 
 	run_embedding_tests
