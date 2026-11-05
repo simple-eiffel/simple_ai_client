@@ -270,7 +270,62 @@ feature -- Test routines: settings
 			assert_false ("injection", l_settings.is_valid_cache_type ("q8_0 --host 0.0.0.0"))
 		end
 
+	test_locked_command
+			-- A key and the local-origins lock add their flags at the end;
+			-- removing them gives back the plain line.
+		note
+			testing: "covers/{LLAMA_SERVER_SETTINGS}.set_api_key",
+				"covers/{LLAMA_SERVER_SETTINGS}.allow_local_origins_only"
+		local
+			l_settings: LLAMA_SERVER_SETTINGS
+			l_plain: STRING_32
+		do
+			create l_settings.make ("s.exe", "m.gguf")
+			l_plain := l_settings.command_line
+			assert_false ("starts_unlocked", l_settings.is_locked)
+			assert_false ("no_key_flag", l_plain.has_substring ({STRING_32} "--api-key"))
+			assert_false ("no_origins_flag", l_plain.has_substring ({STRING_32} "--cors-origins"))
+			l_settings.set_api_key ("Ab3_xY-9kLmN0pQr")
+			l_settings.allow_local_origins_only
+			assert_true ("locked", l_settings.is_locked)
+			assert_true ("ends_locked", l_settings.command_line.ends_with ({STRING_32} " --cors-origins localhost --api-key Ab3_xY-9kLmN0pQr"))
+			l_settings.remove_api_key
+			l_settings.allow_any_origin
+			assert_strings_equal ("plain_again", l_plain, l_settings.command_line)
+		end
+
+	test_api_key_validation
+			-- A key must be long enough and hold nothing that could end an argument.
+		note
+			testing: "covers/{LLAMA_KEY_RULES}.is_valid_api_key"
+		local
+			l_settings: LLAMA_SERVER_SETTINGS
+		do
+			create l_settings.make ("s.exe", "m.gguf")
+			assert_true ("good", l_settings.is_valid_api_key ("Ab3_xY-9kLmN0pQr"))
+			assert_false ("short", l_settings.is_valid_api_key ("abc123"))
+			assert_false ("space", l_settings.is_valid_api_key ("Ab3_xY-9kL mN0pQr"))
+			assert_false ("quote", l_settings.is_valid_api_key ("Ab3_xY-9kLmN0pQr%" --host 0.0.0.0"))
+			assert_false ("non_ascii", l_settings.is_valid_api_key ({STRING_32} "Ab3_xY-9kLmN0pQ%/1488/"))
+		end
+
 feature -- Test routines: client requests
+
+	test_curl_sends_key
+			-- A set key travels as a Bearer header on chat and nowhere when unset.
+		note
+			testing: "covers/{LLAMA_CPP_CLIENT}.set_api_key",
+				"covers/{LLAMA_CPP_CLIENT}.curl_command"
+		local
+			l_client: LLAMA_CPP_CLIENT
+		do
+			create l_client.make_with_base_url ("http://127.0.0.1:8790")
+			assert_false ("no_header", l_client.curl_command ("C:\temp\b.json", True).has_substring ({STRING_32} "Authorization"))
+			l_client.set_api_key ("Ab3_xY-9kLmN0pQr")
+			assert_true ("header", l_client.curl_command ("C:\temp\b.json", True).has_substring ({STRING_32} " -H %"Authorization: Bearer Ab3_xY-9kLmN0pQr%" "))
+			l_client.remove_api_key
+			assert_false ("removed", l_client.curl_command ("C:\temp\b.json", False).has_substring ({STRING_32} "Authorization"))
+		end
 
 	test_request_without_effort
 			-- With no effort set, no template arguments are sent.

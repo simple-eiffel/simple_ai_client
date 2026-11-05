@@ -205,6 +205,7 @@ end
 - **Reasoning effort** travels per request as `chat_template_kwargs.reasoning_effort`; with none set, nothing is sent and the template's default applies. `turn_thinking_off` sends `enable_thinking: false`.
 - **Streaming**: `chat_streaming` reads curl's event stream through `SIMPLE_ASYNC_PROCESS` (every waiting external `C blocking`) and hands thinking and answer to two agents as they arrive. `LLAMA_REPLY_DECODER` is the pure parser behind it, tested against a stream captured from llama-server build 12069.
 - **Fit, don't guess the context.** Measured on an RTX 5070 Ti with the desktop running: a hand-set 110,000-token window over-filled the card and Windows spilled into system memory (11 tokens/s); `set_context_size (0)` let llama.cpp fit 46,848 tokens and ran at 78-118 tokens/s. A 4-bit cache (`"q4_0"`) fits about 74,000.
+- **Lock it.** Loopback alone does not keep out a web page in your own browser: llama-server answers any site by default (the same class of exposure as Ollama's CVE-2024-28224). `settings.set_api_key (key)` plus `client.set_api_key (key)` makes every request but `/health` need `Authorization: Bearer key`. Measured on builds 10001 and 12069: chat, `/props` and `/slots` answer 401 without it. `settings.allow_local_origins_only` adds `--cors-origins localhost`, so pages from other sites get no CORS permission. It needs build 12069 or later; build 10001 refuses to start on the flag, so check `server.server_supports (settings.Cors_origins_flag)` first. A key must be 16–128 ASCII letters, digits, `-` or `_` (`LLAMA_KEY_RULES`). Draw it from a secure source such as `SIMPLE_ENCRYPTION.api_key`. With a key set, `start` reuses a live server only if it accepts that key; otherwise `last_error` says why.
 - Live tests (need a server on 127.0.0.1:8790): target `simple_ai_client_llama_live`. They fail, never skip, when no server answers.
 
 ## Classes
@@ -223,6 +224,7 @@ end
 | `LLAMA_SERVER` | Starts/reuses/stops a local `llama-server`, waits for `/health` |
 | `LLAMA_CPP_CLIENT` | Chat with `llama-server`: reasoning effort, thinking kept apart, streaming |
 | `LLAMA_REPLY_DECODER` | Pure parser for llama-server replies, whole or streamed |
+| `LLAMA_KEY_RULES` | The one rule for a llama-server API key (shared by settings and client) |
 | `AI_RESPONSE` | Response wrapper for chat operations |
 
 ## Embedding Models

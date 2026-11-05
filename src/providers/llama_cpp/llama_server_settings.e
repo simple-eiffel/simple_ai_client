@@ -18,6 +18,21 @@ note
 		Every option has a default that reproduces a plain
 		`llama-server -m MODEL --host 127.0.0.1 --port N -ngl 99 -c 4096',
 		which is what RixQwen 1.0 ran.
+
+		LOCKING (2026-11-03). Loopback alone does not keep a web page in
+		the user's own browser out: llama-server answers any origin by
+		default, and DNS rebinding gets around origin checks altogether.
+		Two locks, both off by default:
+		- `set_api_key': "--api-key KEY". Chat, /props and /slots then
+		  answer 401 without "Authorization: Bearer KEY" (measured on
+		  builds 10001 and 12069; /health stays open). Give the same key
+		  to LLAMA_CPP_CLIENT.set_api_key.
+		- `allow_local_origins_only': "--cors-origins localhost". A page
+		  from any other site gets no CORS permission. Build 10001 does
+		  not know the flag and refuses to start, so ask
+		  LLAMA_SERVER.server_supports (Cors_origins_flag) first.
+		The key is visible on the process's command line to programs the
+		same user runs; it guards against web pages, not local programs.
 	]"
 	author: "Larry Rix"
 	date: "$Date$"
@@ -25,6 +40,9 @@ note
 
 class
 	LLAMA_SERVER_SETTINGS
+
+inherit
+	LLAMA_KEY_RULES
 
 create
 	make
@@ -58,6 +76,8 @@ feature {NONE} -- Initialization
 			default_flash: flash_attention.same_string (Flash_auto)
 			one_slot: slot_count = 1
 			no_mtp: not uses_mtp
+			unlocked: not is_locked
+			any_origin: not is_local_origins_only
 		end
 
 feature -- Access
@@ -104,6 +124,9 @@ feature -- Access
 			-- Tokens the model's multi-token-prediction head drafts per
 			-- step; 0 when MTP is off.
 
+	api_key: detachable STRING_32
+			-- Key the server demands ("--api-key"); Void for none.
+
 	base_url: STRING_32
 			-- Root URL of the server these settings describe.
 		do
@@ -146,6 +169,15 @@ feature -- Access
 				Result.append ({STRING_32} " --spec-type draft-mtp --spec-draft-n-max ")
 				Result.append (mtp_draft_max.out)
 			end
+			if is_local_origins_only then
+				Result.append_character (' ')
+				Result.append (Cors_origins_flag)
+				Result.append ({STRING_32} " localhost")
+			end
+			if attached api_key as al_key then
+				Result.append ({STRING_32} " --api-key ")
+				Result.append (al_key)
+			end
 		ensure
 			starts_with_server: Result.starts_with ({STRING_32} "%"" + server_exe + {STRING_32} "%"")
 			names_model: Result.has_substring ({STRING_32} "-m %"" + model_path + {STRING_32} "%"")
@@ -155,6 +187,9 @@ feature -- Access
 			fitting_leaves_size_unset: fits_to_memory implies not Result.has_substring ({STRING_32} " -c ")
 			mtp_iff_enabled: Result.has_substring ({STRING_32} "draft-mtp") = uses_mtp
 			cache_iff_changed: Result.has_substring ({STRING_32} " -ctk ") = not kv_cache_type.same_string (Default_kv_cache_type)
+			key_iff_locked: Result.has_substring ({STRING_32} " --api-key ") = is_locked
+			key_sent: attached api_key as al_key implies Result.ends_with ({STRING_32} " --api-key " + al_key)
+			origins_iff_local_only: Result.has_substring (Cors_origins_flag) = is_local_origins_only
 		end
 
 feature -- Status report
@@ -178,6 +213,17 @@ feature -- Status report
 		ensure
 			definition: Result = (mtp_draft_max > 0)
 		end
+
+	is_locked: BOOLEAN
+			-- Does the server demand `api_key'?
+		do
+			Result := attached api_key
+		ensure
+			definition: Result = attached api_key
+		end
+
+	is_local_origins_only: BOOLEAN
+			-- Are browser pages from other sites refused CORS permission?
 
 	is_valid_cache_type (a_type: READABLE_STRING_GENERAL): BOOLEAN
 			-- Is `a_type' a cache type llama-server accepts?
@@ -274,6 +320,42 @@ feature -- Element change
 			off: not uses_mtp
 		end
 
+	set_api_key (a_key: READABLE_STRING_GENERAL)
+			-- Make the server demand `a_key' on every request but /health.
+		require
+			valid: is_valid_api_key (a_key)
+		do
+			api_key := a_key.to_string_32
+		ensure
+			locked: is_locked
+			set: attached api_key as al_key and then al_key.same_string_general (a_key)
+		end
+
+	remove_api_key
+			-- Let the server answer without a key.
+		do
+			api_key := Void
+		ensure
+			unlocked: not is_locked
+		end
+
+	allow_local_origins_only
+			-- Refuse CORS permission to pages from other sites
+			-- ("--cors-origins localhost"; llama.cpp build 12069 or later).
+		do
+			is_local_origins_only := True
+		ensure
+			set: is_local_origins_only
+		end
+
+	allow_any_origin
+			-- llama-server's own default: any site's page may call it.
+		do
+			is_local_origins_only := False
+		ensure
+			set: not is_local_origins_only
+		end
+
 feature -- Constants
 
 	Default_port: INTEGER = 8737
@@ -287,6 +369,9 @@ feature -- Constants
 
 	Default_kv_cache_type: STRING_32 = "f16"
 			-- llama-server's own default.
+
+	Cors_origins_flag: STRING_32 = "--cors-origins"
+			-- The flag `allow_local_origins_only' adds.
 
 	Flash_on: STRING_32 = "on"
 	Flash_off: STRING_32 = "off"
@@ -309,6 +394,7 @@ invariant
 	flash_mode_valid: is_valid_flash_mode (flash_attention)
 	slots_positive: slot_count >= 1
 	mtp_non_negative: mtp_draft_max >= 0
+	key_valid: attached api_key as al_key implies is_valid_api_key (al_key)
 
 note
 	copyright: "Copyright (c) 2026, Larry Rix"
