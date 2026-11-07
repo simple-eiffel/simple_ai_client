@@ -132,7 +132,7 @@ feature -- Test routines: response direction, a real child process
 				l_dir := {STRING_32} "."
 			end
 			create l_uuid.make
-			l_path := l_dir + {STRING_32} "\simple_ai_utf8_test_" + l_uuid.new_v4_compact.to_string_32 + {STRING_32} ".txt"
+			l_path := l_dir + path_separator + {STRING_32} "simple_ai_utf8_test_" + l_uuid.new_v4_compact.to_string_32 + {STRING_32} ".txt"
 
 			create l_file.make_with_name (l_path)
 			l_file.create_read_write
@@ -140,7 +140,7 @@ feature -- Test routines: response direction, a real child process
 			l_file.close
 
 			create l_helper
-			l_raw := l_helper.shell_output ({STRING_32} "cmd.exe /c type %"" + l_path + {STRING_32} "%"", Void)
+			l_raw := l_helper.shell_output (file_dump_command (l_path), Void)
 
 			create l_file.make_with_name (l_path)
 			if l_file.exists then
@@ -179,13 +179,13 @@ feature -- Test routines: response direction, a real child process
 				l_dir := {STRING_32} "."
 			end
 			create l_uuid.make
-			l_path := l_dir + {STRING_32} "\simple_ai_latin1_test_" + l_uuid.new_v4_compact.to_string_32 + {STRING_32} ".txt"
+			l_path := l_dir + path_separator + {STRING_32} "simple_ai_latin1_test_" + l_uuid.new_v4_compact.to_string_32 + {STRING_32} ".txt"
 			create l_file.make_with_name (l_path)
 			l_file.create_read_write
 			l_file.put_string ({UTF_CONVERTER}.string_32_to_utf_8_string_8 (l_source))
 			l_file.close
 			create l_helper
-			l_raw := l_helper.shell_output ({STRING_32} "cmd.exe /c type %"" + l_path + {STRING_32} "%"", Void)
+			l_raw := l_helper.shell_output (file_dump_command (l_path), Void)
 			create l_file.make_with_name (l_path)
 			if l_file.exists then
 				l_file.delete
@@ -257,7 +257,7 @@ feature -- Test routines: request direction
 				l_dir := {STRING_32} "."
 			end
 			create l_uuid.make
-			l_path := l_dir + {STRING_32} "\simple_ai_utf8_req_test_" + l_uuid.new_v4_compact.to_string_32 + {STRING_32} ".txt"
+			l_path := l_dir + path_separator + {STRING_32} "simple_ai_utf8_req_test_" + l_uuid.new_v4_compact.to_string_32 + {STRING_32} ".txt"
 
 				-- Write the way every fixed provider now writes a request
 				-- body: real UTF-8 bytes, not `l_source.to_string_8'
@@ -269,7 +269,7 @@ feature -- Test routines: request direction
 			l_file.close
 
 			create l_helper
-			l_raw := l_helper.shell_output ({STRING_32} "cmd.exe /c type %"" + l_path + {STRING_32} "%"", Void)
+			l_raw := l_helper.shell_output (file_dump_command (l_path), Void)
 
 			create l_file.make_with_name (l_path)
 			if l_file.exists then
@@ -279,6 +279,35 @@ feature -- Test routines: request direction
 			create l_client.make
 			assert_strings_equal ("the child read back the exact prompt",
 				l_source, l_client.decode_process_bytes (l_raw))
+		end
+
+feature {NONE} -- Implementation
+
+	path_separator: STRING_32
+			-- Separator between a directory and a file name.
+		do
+			if {PLATFORM}.is_windows then
+				Result := {STRING_32} "\"
+			else
+				Result := {STRING_32} "/"
+			end
+		ensure
+			one_character: Result.count = 1
+		end
+
+	file_dump_command (a_path: READABLE_STRING_32): STRING_32
+			-- Command for a real child process that writes the bytes of
+			-- `a_path' to its standard output.
+		require
+			path_not_empty: not a_path.is_empty
+		do
+			if {PLATFORM}.is_windows then
+				Result := {STRING_32} "cmd.exe /c type %"" + a_path + {STRING_32} "%""
+			else
+				Result := {STRING_32} "cat %"" + a_path + {STRING_32} "%""
+			end
+		ensure
+			names_the_file: Result.has_substring (a_path)
 		end
 
 note
